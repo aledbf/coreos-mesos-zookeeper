@@ -31,11 +31,13 @@ apk del curl ca-certificates
 
 mkdir -p /tmp/zookeeper /opt
 
-wget -q -O - http://apache.mirrors.pair.com/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz | tar -xzf - -C /opt
+wget -q -O - http://apache.mirrors.pair.com/zookeeper/zookeeper-3.5.0-alpha/zookeeper-3.5.0-alpha.tar.gz | tar -xzf - -C /opt
 
-ln -s /opt/zookeeper-3.4.6 /opt/zookeeper
+ln -s /opt/zookeeper-3.5.0-alpha /opt/zookeeper
 
-cp /opt/zookeeper-3.4.6/conf/zoo_sample.cfg /opt/zookeeper-3.4.6/conf/zoo.cfg
+cp /app/zoo.cfg /opt/zookeeper-3.5.0-alpha/conf/zoo.cfg
+
+touch /opt/zookeeper/conf/zoo_replication.cfg.dynamic
 
 mv jdk1.${JAVA_VERSION_MAJOR}.0_${JAVA_VERSION_MINOR}/jre /jre
 

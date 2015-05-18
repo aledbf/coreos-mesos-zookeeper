@@ -17,7 +17,7 @@ echo "deb http://repos.mesosphere.io/ubuntu/ trusty main" > /etc/apt/sources.lis
 apt-key adv --keyserver keyserver.ubuntu.com --recv E56151BF
 
 apt-get update && \
-  apt-get -y install mesos
+  apt-get -y install mesos=$MESOS
 
 # cleanup. indicate that python, libpq and libyanl are required packages.
 apt-get autoremove -y --purge && \

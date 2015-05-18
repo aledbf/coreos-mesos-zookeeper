@@ -10,13 +10,10 @@ ENV PATH ${PATH}:${JAVA_HOME}/bin
 
 EXPOSE 2181 2888 3888
 
-COPY build.sh /tmp/build.sh
+ADD . /app
 
-RUN DOCKER_BUILD=true /tmp/build.sh
+RUN DOCKER_BUILD=true /app/build.sh
 
 WORKDIR /opt/zookeeper
 
-ENTRYPOINT ["/opt/zookeeper/bin/zkServer.sh"]
-
-CMD ["start-foreground"]
-
+ENTRYPOINT ["/app/bin/boot"]

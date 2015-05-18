@@ -1,0 +1,138 @@
+{
+	"ImportPath": "github.com/aledbf/coreos-mesos-zookeeper",
+	"GoVersion": "go1.4.2",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.5.1-35-g2e36101",
+			"Rev": "2e36101a197f56f60ca6c37c3c256ed3713a9649"
+		},
+		{
+			"ImportPath": "github.com/coreos/fleet/client",
+			"Comment": "v0.10.1-13-gf1d86c7",
+			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
+		},
+		{
+			"ImportPath": "github.com/coreos/fleet/etcd",
+			"Comment": "v0.10.1-13-gf1d86c7",
+			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
+		},
+		{
+			"ImportPath": "github.com/coreos/fleet/job",
+			"Comment": "v0.10.1-13-gf1d86c7",
+			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
+		},
+		{
+			"ImportPath": "github.com/coreos/fleet/log",
+			"Comment": "v0.10.1-13-gf1d86c7",
+			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
+		},
+		{
+			"ImportPath": "github.com/coreos/fleet/machine",
+			"Comment": "v0.10.1-13-gf1d86c7",
+			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
+		},
+		{
+			"ImportPath": "github.com/coreos/fleet/pkg",
+			"Comment": "v0.10.1-13-gf1d86c7",
+			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
+		},
+		{
+			"ImportPath": "github.com/coreos/fleet/registry",
+			"Comment": "v0.10.1-13-gf1d86c7",
+			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
+		},
+		{
+			"ImportPath": "github.com/coreos/fleet/schema",
+			"Comment": "v0.10.1-13-gf1d86c7",
+			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
+		},
+		{
+			"ImportPath": "github.com/coreos/fleet/unit",
+			"Comment": "v0.10.1-13-gf1d86c7",
+			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
+		},
+		{
+			"ImportPath": "github.com/coreos/go-etcd/etcd",
+			"Comment": "v0.2.0-rc1-120-g23142f6",
+			"Rev": "23142f6773a676cc2cae8dd0cb90b2ea761c853f"
+		},
+		{
+			"ImportPath": "github.com/coreos/go-semver/semver",
+			"Rev": "6fe83ccda8fb9b7549c9ab4ba47f47858bc950aa"
+		},
+		{
+			"ImportPath": "github.com/coreos/go-systemd/unit",
+			"Comment": "v2-27-g97e243d",
+			"Rev": "97e243d21a8e232e9d8af38ba2366dfcfceebeba"
+		},
+		{
+			"ImportPath": "github.com/deis/deis/pkg/boot",
+			"Comment": "v0.0.6-4175-g13afe32",
+			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
+		},
+		{
+			"ImportPath": "github.com/deis/deis/pkg/confd",
+			"Comment": "v0.0.6-4175-g13afe32",
+			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
+		},
+		{
+			"ImportPath": "github.com/deis/deis/pkg/etcd",
+			"Comment": "v0.0.6-4175-g13afe32",
+			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
+		},
+		{
+			"ImportPath": "github.com/deis/deis/pkg/log",
+			"Comment": "v0.0.6-4175-g13afe32",
+			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
+		},
+		{
+			"ImportPath": "github.com/deis/deis/pkg/net",
+			"Comment": "v0.0.6-4175-g13afe32",
+			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
+		},
+		{
+			"ImportPath": "github.com/deis/deis/pkg/os",
+			"Comment": "v0.0.6-4175-g13afe32",
+			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
+		},
+		{
+			"ImportPath": "github.com/deis/deis/pkg/types",
+			"Comment": "v0.0.6-4175-g13afe32",
+			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
+		},
+		{
+			"ImportPath": "github.com/docker/libcontainer/netlink",
+			"Comment": "v1.2.0-160-g7294213",
+			"Rev": "72942137ef110d9468be3a4855b687d3734794df"
+		},
+		{
+			"ImportPath": "github.com/jonboulle/clockwork",
+			"Rev": "b473f398c464f1988327f67c9e6aa7fba62f80d2"
+		},
+		{
+			"ImportPath": "github.com/kardianos/osext",
+			"Rev": "ccfcd0245381f0c94c68f50626665eed3c6b726a"
+		},
+		{
+			"ImportPath": "github.com/pmylund/go-cache",
+			"Rev": "93d85800f2fa6bd0a739e7bd612bfa3bc008b72d"
+		},
+		{
+			"ImportPath": "github.com/progrium/go-basher",
+			"Rev": "ca3b97b3bd2a7eda303716f56916684771b79942"
+		},
+		{
+			"ImportPath": "github.com/robfig/cron",
+			"Comment": "v1-2-g67823cd",
+			"Rev": "67823cd24dece1b04cced3a0a0b3ca2bc84d875e"
+		},
+		{
+			"ImportPath": "google.golang.org/api/googleapi",
+			"Rev": "d4ab0b854f8606d689612515c3d18bd3b19d7e70"
+		}
+	]
+}
