@@ -1,0 +1,3 @@
+FROM aledbf/mesos-template:VERSION
+
+ENTRYPOINT ["mesos-slave"]

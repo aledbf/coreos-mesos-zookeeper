@@ -1,0 +1,4 @@
+FROM aledbf/mesos-template:VERSION
+
+CMD ["--registry=in_memory"]
+ENTRYPOINT ["mesos-master"]
