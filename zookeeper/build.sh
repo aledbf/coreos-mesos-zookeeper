@@ -10,24 +10,26 @@ if [[ -z $DOCKER_BUILD ]]; then
   exit 1
 fi
 
-apk add --update curl ca-certificates wget bash
+apk add --update curl ca-certificates bash
 
 cd /tmp
 
-curl -o glibc-2.21-r2.apk "https://circle-artifacts.com/gh/andyshinn/alpine-pkg-glibc/6/artifacts/0/home/ubuntu/alpine-pkg-glibc/packages/x86_64/glibc-2.21-r2.apk"
+curl -sSL -o glibc-2.21-r2.apk "https://circle-artifacts.com/gh/andyshinn/alpine-pkg-glibc/6/artifacts/0/home/ubuntu/alpine-pkg-glibc/packages/x86_64/glibc-2.21-r2.apk"
 
 apk add --allow-untrusted glibc-2.21-r2.apk
 
-curl -o glibc-bin-2.21-r2.apk "https://circle-artifacts.com/gh/andyshinn/alpine-pkg-glibc/6/artifacts/0/home/ubuntu/alpine-pkg-glibc/packages/x86_64/glibc-bin-2.21-r2.apk"
+curl -sSL -o glibc-bin-2.21-r2.apk "https://circle-artifacts.com/gh/andyshinn/alpine-pkg-glibc/6/artifacts/0/home/ubuntu/alpine-pkg-glibc/packages/x86_64/glibc-bin-2.21-r2.apk"
 
 apk add --allow-untrusted glibc-bin-2.21-r2.apk
 
 /usr/glibc/usr/bin/ldconfig /lib /usr/glibc/usr/lib
 
+echo "Downloading Oracle JDK..."
 curl -jksSLH "Cookie: oraclelicense=accept-securebackup-cookie"\
   http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/${JAVA_PACKAGE}-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.tar.gz | gunzip -c - | tar -xf -
 
 # install confd
+echo "Downloading confd..."
 curl -sSL -o /sbin/confd https://s3-us-west-2.amazonaws.com/opdemand/confd-git-73f7489 \
   && chmod +x /sbin/confd
 
@@ -35,7 +37,8 @@ apk del curl ca-certificates
 
 mkdir -p /tmp/zookeeper /opt
 
-wget -q -O - http://apache.mirrors.pair.com/zookeeper/zookeeper-3.5.0-alpha/zookeeper-3.5.0-alpha.tar.gz | tar -xzf - -C /opt
+echo "Downloading zookeeper..."
+curl -sSL http://apache.mirrors.pair.com/zookeeper/zookeeper-3.5.0-alpha/zookeeper-3.5.0-alpha.tar.gz | tar -xzf - -C /opt
 
 ln -s /opt/zookeeper-3.5.0-alpha /opt/zookeeper
 
