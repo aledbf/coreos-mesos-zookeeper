@@ -1,6 +1,6 @@
 [template]
-src   = "zoo_replication.cfg.dynamic"
-dest  = "/opt/zookeeper/conf/zoo_replication.cfg.dynamic"
+src   = "zoo_cfg.dynamic"
+dest  = "/opt/zookeeper/conf/zoo_cfg.dynamic"
 keys = [
   "/zookeeper/nodes",
 ]

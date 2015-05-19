@@ -19,7 +19,7 @@ Services and images to start mesos and zookeeper in coreos
 Starting in 3.5.0 is possible to resize the zookeeper cluster using (dynamic reconfiguration)[http://zookeeper.apache.org/doc/trunk/zookeeperReconfig.html#ch_reconfig_dyn]
 
 ### Required fleet metadata for zookeeper
-Any node where is possible to rung zookeeper must have the `role=zookeeper` metadata.
+Any node where is possible to rung zookeeper must have the `zookeeper=true` metadata.
 
 ```
   - name: fleet.service
@@ -31,6 +31,6 @@ Any node where is possible to rung zookeeper must have the `role=zookeeper` meta
       After=etcd.service
 
       [Service]
-      Environment="FLEET_METADATA=role=zookeeper"
+      Environment="FLEET_METADATA=zookeeper=true"
       ExecStart=/usr/bin/fleetd
 ```

@@ -1,11 +1,16 @@
 package main
 
 import (
+	"strconv"
+
+	"github.com/Scalingo/go-etcd-lock/lock"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/boot"
+	"github.com/aledbf/coreos-mesos-zookeeper/pkg/etcd"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/fleet"
 	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/os"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/types"
+	goetcd "github.com/coreos/go-etcd/etcd"
 )
 
 const (
@@ -41,16 +46,43 @@ func (cb *ZkBoot) PreBootScripts(currentBoot *types.CurrentBoot) []*types.Script
 
 func (cb *ZkBoot) PreBoot(currentBoot *types.CurrentBoot) {
 	log.Info("zookeeper: starting...")
-	// lock etcd
-	// check if this node is configured
-	// if not
-	// get fleet nodes with the required role
-	// preassing the ids for every node
-	// unlock
-	// continue
-	// go func(){
+	// check if the nodes with the required role already have the an id. If not
+	// get fleet nodes with the required role and preassing the ids for every node
+	l, err := lock.Acquire(currentBoot.EtcdClient, "/zookeeper/masterLock", 120)
+	if lockErr, ok := err.(*lock.Error); ok {
+		log.Debug(lockErr)
+		return
+	} else if err != nil {
+		panic(err)
+	}
 
-	// }
+	zkNodes := etcd.GetList(currentBoot.EtcdClient, etcdPath)
+
+	log.Debug("initializing zookeeper cluster ids...")
+	machines, err := getMachines()
+	if err != nil {
+		panic(err)
+	}
+
+	if len(zkNodes) == 0 {
+		// initialize cluster
+		for index, newZkNode := range machines {
+			etcd.Set(currentBoot.EtcdClient, etcdPath+"/"+newZkNode+"/id", strconv.Itoa(index+1), 0)
+		}
+	} else {
+		// we check if some machine in the fleet cluster with the
+		// required role is not initialized (no zookeeper node id).
+		machinesNotInitialized := difference(machines, zkNodes)
+		if len(machinesNotInitialized) > 0 {
+			nextNodeId := getNextNodeId(currentBoot.EtcdClient, zkNodes)
+			for _, zkNode := range machinesNotInitialized {
+				etcd.Set(currentBoot.EtcdClient, etcdPath+"/"+zkNode+"/id", strconv.Itoa(nextNodeId), 0)
+				nextNodeId++
+			}
+		}
+	}
+
+	l.Release()
 }
 
 func (cb *ZkBoot) BootDaemons(currentBoot *types.CurrentBoot) []*types.ServiceDaemon {
@@ -82,11 +114,48 @@ func (cb *ZkBoot) PreShutdownScripts(currentBoot *types.CurrentBoot) []*types.Sc
 	return []*types.Script{}
 }
 
+// getMachines return the list of machines that can run zookeeper or an empty list
 func getMachines() ([]string, error) {
-	metadata, err := fleet.ParseMetadata("role=zookeeper")
+	metadata, err := fleet.ParseMetadata("zookeeper=true")
 	if err != nil {
 		panic(err)
 	}
 
 	return fleet.GetMachines(fleetEndpoint, metadata)
+}
+
+// getNextNodeId returns the next id to use as zookeeper node index
+func getNextNodeId(etcdClient *goetcd.Client, nodes []string) int {
+	result := 0
+	for _, node := range nodes {
+		id := etcd.Get(etcdClient, etcdPath+"/"+node+"/id")
+		numericId, err := strconv.Atoi(id)
+		if id != "" && err == nil && numericId > result {
+			result = numericId
+		}
+	}
+
+	return result + 1
+}
+
+// difference get the elements present in the first slice and not in
+// the second one returning those elemenets in a new string slice.
+func difference(slice1 []string, slice2 []string) []string {
+	diffStr := []string{}
+	m := map[string]int{}
+
+	for _, s1Val := range slice1 {
+		m[s1Val] = 1
+	}
+	for _, s2Val := range slice2 {
+		m[s2Val] = m[s2Val] + 1
+	}
+
+	for mKey, mVal := range m {
+		if mVal == 1 {
+			diffStr = append(diffStr, mKey)
+		}
+	}
+
+	return diffStr
 }
