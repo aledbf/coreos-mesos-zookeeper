@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	timeout  time.Duration = 60 * time.Second
+	timeout  time.Duration = 10 * time.Second
 	ttl      time.Duration = timeout * 2
 	etcdPort int           = 4001
 )
@@ -111,6 +111,7 @@ func Start(etcdPath string, externalPort int) {
 	code := <-exitChan
 
 	// pre shutdown tasks
+	log.Debugf("executing pre shutdown scripts")
 	preShutdownScripts := component.PreShutdownScripts(currentBoot)
 	runAllScripts(signalChan, preShutdownScripts)
 

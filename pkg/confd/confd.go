@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	// "regexp"
+	"strings"
 	"syscall"
 	"time"
 
@@ -26,7 +27,8 @@ var (
 func WaitForInitialConf(signalChan chan os.Signal, etcd []string, timeout time.Duration) {
 	log.Info("waiting for confd to write initial templates...")
 	for {
-		cmdAsString := fmt.Sprintf("confd -onetime -node %v -confdir /app", etcd)
+		cmdAsString := fmt.Sprintf("confd -onetime -node %v -confdir /app", strings.Join(etcd, ","))
+		log.Debugf("running %s", cmdAsString)
 		cmd, args := oswrapper.BuildCommandFromString(cmdAsString)
 		err := oswrapper.RunCommand(signalChan, cmd, args, false)
 		if err == nil {
@@ -39,7 +41,7 @@ func WaitForInitialConf(signalChan chan os.Signal, etcd []string, timeout time.D
 
 // Launch launch confd as a daemon process.
 func Launch(signalChan chan os.Signal, etcd []string) {
-	cmdAsString := fmt.Sprintf("confd -node %v -confdir /app --interval 5 --log-level error", etcd)
+	cmdAsString := fmt.Sprintf("confd -node %v -confdir /app --interval 5 --log-level error", strings.Join(etcd, ","))
 	cmd, args := oswrapper.BuildCommandFromString(cmdAsString)
 	go runConfdDaemon(signalChan, cmd, args)
 }

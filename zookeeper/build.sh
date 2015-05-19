@@ -27,6 +27,10 @@ apk add --allow-untrusted glibc-bin-2.21-r2.apk
 curl -jksSLH "Cookie: oraclelicense=accept-securebackup-cookie"\
   http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/${JAVA_PACKAGE}-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.tar.gz | gunzip -c - | tar -xf -
 
+# install confd
+curl -sSL -o /sbin/confd https://s3-us-west-2.amazonaws.com/opdemand/confd-git-73f7489 \
+  && chmod +x /sbin/confd
+
 apk del curl ca-certificates
 
 mkdir -p /tmp/zookeeper /opt

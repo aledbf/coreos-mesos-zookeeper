@@ -1,8 +1,6 @@
 [template]
 src   = "zoo_replication.cfg.dynamic"
 dest  = "/opt/zookeeper/conf/zoo_replication.cfg.dynamic"
-mode  = "0640"
 keys = [
   "/zookeeper/nodes",
 ]
-reload_cmd = "/app/bin/reload"
