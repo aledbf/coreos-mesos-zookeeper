@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"reflect"
 	"testing"
 	"time"
 
@@ -80,6 +81,11 @@ func TestMkdirEtcd(t *testing.T) {
 	values = GetList(etcdClient, "/directory")
 	if len(values) != 2 {
 		t.Fatalf("Expected '%v' arguments but returned '%v'", 2, len(values))
+	}
+
+	lsResult := []string{"item_1", "item_2"}
+	if !reflect.DeepEqual(values, lsResult) {
+		t.Fatalf("Expected '%v' arguments but returned '%v'", lsResult, values)
 	}
 }
 

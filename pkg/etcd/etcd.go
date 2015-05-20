@@ -2,6 +2,7 @@ package etcd
 
 import (
 	"errors"
+	"path"
 	"strconv"
 	"time"
 
@@ -68,20 +69,20 @@ func Get(client *etcd.Client, key string) string {
 	return result.Node.Value
 }
 
-// GetList returns the list of elements insise a key or an empty list
+// GetList returns the list of elements inside a key or an empty list
 func GetList(client *etcd.Client, key string) []string {
 	values, err := client.Get(key, true, false)
 	if err != nil {
-		log.Debugf("%v", err)
+		log.Debugf("getlist %v", err)
 		return []string{}
 	}
 
 	result := []string{}
 	for _, node := range values.Node.Nodes {
-		result = append(result, node.Value)
+		result = append(result, path.Base(node.Key))
 	}
 
-	log.Infof("%v", result)
+	log.Infof("getlist %s -> %v", key, result)
 	return result
 }
 
