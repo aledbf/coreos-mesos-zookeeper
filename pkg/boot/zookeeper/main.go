@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"strconv"
 
 	"github.com/Scalingo/go-etcd-lock/lock"
@@ -8,7 +9,7 @@ import (
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/etcd"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/fleet"
 	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
-	"github.com/aledbf/coreos-mesos-zookeeper/pkg/os"
+	oswrapper "github.com/aledbf/coreos-mesos-zookeeper/pkg/os"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/types"
 	goetcd "github.com/coreos/go-etcd/etcd"
 )
@@ -18,7 +19,7 @@ const (
 )
 
 var (
-	etcdPath = os.Getopt("ETCD_PATH", "/zookeeper/nodes")
+	etcdPath = oswrapper.Getopt("ETCD_PATH", "/zookeeper/nodes")
 	log      = logger.New()
 )
 
@@ -57,15 +58,16 @@ func (cb *ZkBoot) PreBoot(currentBoot *types.CurrentBoot) {
 	}
 
 	zkNodes := etcd.GetList(currentBoot.EtcdClient, etcdPath)
+	log.Debugf("zookeeper nodes %v",zkNodes)
 
-	log.Debug("initializing zookeeper cluster ids...")
 	machines, err := getMachines()
 	if err != nil {
 		panic(err)
 	}
+	log.Debugf("machines %v", machines)
 
 	if len(zkNodes) == 0 {
-		// initialize cluster
+		log.Debug("initializing zookeeper cluster")
 		for index, newZkNode := range machines {
 			etcd.Set(currentBoot.EtcdClient, etcdPath+"/"+newZkNode+"/id", strconv.Itoa(index+1), 0)
 		}
@@ -83,10 +85,24 @@ func (cb *ZkBoot) PreBoot(currentBoot *types.CurrentBoot) {
 	}
 
 	l.Release()
+
+	// we need to write the file /opt/zookeeper/data/myid with the id of this node
+	zkId := etcd.Get(currentBoot.EtcdClient, etcdPath+"/"+currentBoot.Host.String()+"/id")
+	zkIdAsByte := []byte(zkId)
+	os.MkdirAll("/opt/zookeeper/data", 0640)
+	file, err := os.Create("/opt/zookeeper/data/myid")
+	if err != nil {
+		panic(err)
+	}
+	_, err = file.Write(zkIdAsByte)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
 }
 
 func (cb *ZkBoot) BootDaemons(currentBoot *types.CurrentBoot) []*types.ServiceDaemon {
-	cmd, args := os.BuildCommandFromString("/opt/zookeeper/bin/zkServer.sh start-foreground")
+	cmd, args := oswrapper.BuildCommandFromString("/opt/zookeeper/bin/zkServer.sh start-foreground")
 	return []*types.ServiceDaemon{&types.ServiceDaemon{Command: cmd, Args: args}}
 }
 
