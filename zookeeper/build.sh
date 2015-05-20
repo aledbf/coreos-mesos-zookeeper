@@ -10,6 +10,7 @@ if [[ -z $DOCKER_BUILD ]]; then
   exit 1
 fi
 
+
 apk add --update curl ca-certificates bash
 
 cd /tmp
@@ -24,16 +25,14 @@ apk add --allow-untrusted glibc-bin-2.21-r2.apk
 
 /usr/glibc/usr/bin/ldconfig /lib /usr/glibc/usr/lib
 
+# install confd
+echo "Downloading confd..."
+curl -sSL -o /sbin/confd https://github.com/kelseyhightower/confd/releases/download/v0.9.0/confd-0.9.0-linux-amd64 \
+  && chmod +x /sbin/confd
+
 echo "Downloading Oracle JDK..."
 curl -jksSLH "Cookie: oraclelicense=accept-securebackup-cookie"\
   http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/${JAVA_PACKAGE}-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.tar.gz | gunzip -c - | tar -xf -
-
-# install confd
-echo "Downloading confd..."
-curl -sSL -o /sbin/confd https://s3-us-west-2.amazonaws.com/opdemand/confd-git-73f7489 \
-  && chmod +x /sbin/confd
-
-apk del curl ca-certificates
 
 mkdir -p /tmp/zookeeper /opt
 
@@ -49,6 +48,8 @@ touch /opt/zookeeper/conf/zoo_replication.cfg.dynamic
 mv jdk1.${JAVA_VERSION_MAJOR}.0_${JAVA_VERSION_MINOR}/jre /jre
 
 # cleanup
+
+apk del curl ca-certificates
 
 rm /jre/bin/jjs
 rm /jre/bin/keytool
