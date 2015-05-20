@@ -5,7 +5,8 @@ ZOOKEEPER_VERSION = 3.5.0
 
 build-go:
 	echo "Building..."
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o zookeeper/bin/boot pkg/boot/zookeeper/main.go
+	go-bindata -pkg bindata -o pkg/boot/zookeeper/bindata/bindata.go pkg/boot/zookeeper/bash/; \
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o zookeeper/bin/boot pkg/boot/zookeeper/main/boot.go
 
 build: build-go mesos-template mesos-master mesos-slave zookeeper
 	echo "Building docker images..."

@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
+	"time"
 
 	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
 
@@ -42,6 +43,11 @@ func RunProcessAsDaemon(signalChan chan os.Signal, command string, args []string
 		signalChan <- syscall.SIGKILL
 	}
 
+	defer func() {
+		// before we terminate the execution we wait for 5 seconds
+		time.Sleep(5 * time.Second)
+	}()
+
 	err = cmd.Wait()
 	log.Errorf("command finished with error: %v", err)
 	signalChan <- syscall.SIGKILL
@@ -50,7 +56,7 @@ func RunProcessAsDaemon(signalChan chan os.Signal, command string, args []string
 // RunScript run a shell script using go-basher and if it returns an error
 // send a signal to terminate the execution
 func RunScript(script string, params map[string]string, loader func(string) ([]byte, error)) error {
-	bash, _ := basher.NewContext("/bin/bash", false)
+	bash, _ := basher.NewContext("/bin/bash", log.Level.String() == "debug")
 	bash.Source(script, loader)
 	if params != nil {
 		for key, value := range params {
@@ -70,17 +76,13 @@ func RunScript(script string, params map[string]string, loader func(string) ([]b
 }
 
 // RunCommand run a command and return.
-func RunCommand(signalChan chan os.Signal, command string, args []string, signalErrors bool) error {
+func RunCommand(command string, args []string) error {
 	cmd := exec.Command(command, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	err := cmd.Run()
 	if err != nil {
-		if signalErrors {
-			signalChan <- syscall.SIGKILL
-		}
-
 		return err
 	}
 

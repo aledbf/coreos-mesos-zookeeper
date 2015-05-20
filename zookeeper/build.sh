@@ -10,7 +10,6 @@ if [[ -z $DOCKER_BUILD ]]; then
   exit 1
 fi
 
-
 apk add --update curl ca-certificates bash
 
 cd /tmp
@@ -31,6 +30,11 @@ curl -sSL -o /sbin/confd https://github.com/kelseyhightower/confd/releases/downl
   && chmod +x /sbin/confd
 
 echo "Downloading Oracle JDK..."
+JAVA_VERSION_MAJOR=8
+JAVA_VERSION_MINOR=45
+JAVA_VERSION_BUILD=14
+JAVA_PACKAGE=server-jre
+
 curl -jksSLH "Cookie: oraclelicense=accept-securebackup-cookie"\
   http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/${JAVA_PACKAGE}-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.tar.gz | gunzip -c - | tar -xf -
 
@@ -41,14 +45,9 @@ curl -sSL http://apache.mirrors.pair.com/zookeeper/zookeeper-3.5.0-alpha/zookeep
 
 ln -s /opt/zookeeper-3.5.0-alpha /opt/zookeeper
 
-cp /app/zoo.cfg /opt/zookeeper-3.5.0-alpha/conf/zoo.cfg
-
-touch /opt/zookeeper/conf/zoo_replication.cfg.dynamic
-
 mv jdk1.${JAVA_VERSION_MAJOR}.0_${JAVA_VERSION_MINOR}/jre /jre
 
 # cleanup
-
 apk del curl ca-certificates
 
 rm /jre/bin/jjs

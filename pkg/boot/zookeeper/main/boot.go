@@ -1,0 +1,142 @@
+package main
+
+import (
+	"io/ioutil"
+	"net/http"
+	"os"
+	"os/signal"
+	"strconv"
+	"strings"
+	"syscall"
+	"time"
+
+	"github.com/aledbf/coreos-mesos-zookeeper/pkg/boot/zookeeper/bindata"
+
+	"github.com/aledbf/coreos-mesos-zookeeper/pkg/boot/zookeeper"
+	"github.com/aledbf/coreos-mesos-zookeeper/pkg/confd"
+	"github.com/aledbf/coreos-mesos-zookeeper/pkg/etcd"
+	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
+	oswrapper "github.com/aledbf/coreos-mesos-zookeeper/pkg/os"
+)
+
+var (
+	etcdPath   = oswrapper.Getopt("ETCD_PATH", "/zookeeper/nodes")
+	log        = logger.New()
+	signalChan = make(chan os.Signal, 1)
+)
+
+func main() {
+	go func() {
+		log.Debugf("starting pprof http server in port 6060")
+		http.ListenAndServe("localhost:6060", nil)
+	}()
+
+	host := oswrapper.Getopt("HOST", "127.0.0.1")
+	etcdCtlPeers := oswrapper.Getopt("ETCDCTL_PEERS", "127.0.0.1")
+	etcdClient := etcd.NewClient(getHttpEtcdUrls(host, etcdCtlPeers, 4001))
+
+	zkServer := &zookeeper.ZkServer{
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+	}
+
+	signal.Notify(signalChan,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGKILL,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+		os.Interrupt,
+	)
+
+	// Wait for a signal and exit
+	exitChan := make(chan int)
+	go func() {
+		for {
+			s := <-signalChan
+			log.Debugf("Signal received: %v", s)
+			switch s {
+			case syscall.SIGTERM:
+				exitChan <- 0
+			case syscall.SIGQUIT:
+				exitChan <- 0
+			case syscall.SIGKILL:
+				exitChan <- 1
+			default:
+				exitChan <- 1
+			}
+		}
+	}()
+
+	etcd.Mkdir(etcdClient, etcdPath)
+
+	log.Info("zookeeper: starting...")
+
+	zookeeper.CheckZkMappingInFleet(etcdPath, etcdClient)
+
+	// we need to write the file /opt/zookeeper-data/data/myid with the id of this node
+	os.MkdirAll("/opt/zookeeper-data/data", 0640)
+	zkId := etcd.Get(etcdClient, etcdPath+"/"+host+"/id")
+	ioutil.WriteFile("/opt/zookeeper-data/data/myid", []byte(zkId), 0640)
+
+	// wait for confd to run once and install initial templates
+	confd.WaitForInitialConf(getConfdNodes(host, etcdCtlPeers, 4001), 10*time.Second)
+
+	params := make(map[string]string)
+	params["HOST"] = host
+	if log.Level.String() == "debug" {
+		params["DEBUG"] = "true"
+	}
+
+	err := oswrapper.RunScript("pkg/boot/zookeeper/bash/add-node.bash", params, bindata.Asset)
+	if err != nil {
+		log.Printf("command finished with error: %v", err)
+	}
+
+	if err := zkServer.Start(); err != nil {
+		panic(err)
+	}
+
+	log.Info("zookeeper: running...")
+
+	code := <-exitChan
+	log.Debugf("execution terminated with exit code %v", code)
+
+	log.Debugf("executing pre shutdown script")
+	err = oswrapper.RunScript("pkg/boot/zookeeper/bash/remove-node.bash", params, bindata.Asset)
+	if err != nil {
+		log.Printf("command finished with error: %v", err)
+	}
+
+	log.Info("stopping zookeeper node")
+	zkServer.Stop()
+}
+
+func getConfdNodes(host, etcdCtlPeers string, port int) []string {
+	result := []string{host + ":" + strconv.Itoa(port)}
+
+	if etcdCtlPeers != "127.0.0.1" {
+		hosts := strings.Split(etcdCtlPeers, ",")
+		result := []string{}
+		for _, _host := range hosts {
+			result = append(result, _host+":"+strconv.Itoa(port))
+		}
+	}
+
+	return result
+}
+
+// getEtcdHosts returns an array of urls that contains at least one host
+func getHttpEtcdUrls(host, etcdCtlPeers string, port int) []string {
+	result := []string{"http://" + host + ":" + strconv.Itoa(port)}
+
+	if etcdCtlPeers != "127.0.0.1" {
+		hosts := strings.Split(etcdCtlPeers, ",")
+		result := []string{}
+		for _, _host := range hosts {
+			result = append(result, "http://"+_host+":"+strconv.Itoa(port))
+		}
+	}
+
+	return result
+}

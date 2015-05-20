@@ -146,7 +146,7 @@ func start(currentBoot *types.CurrentBoot) {
 
 	if component.UseConfd() {
 		// spawn confd in the background to update services based on etcd changes
-		go confd.Launch(signalChan, currentBoot.ConfdNodes)
+		// go confd.Launch(signalChan, currentBoot.ConfdNodes)
 	}
 
 	log.Debug("running boot daemons")

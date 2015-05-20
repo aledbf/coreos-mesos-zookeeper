@@ -1,4 +1,2 @@
-{{ range $node := lsdir "/zookeeper/nodes" }}
-{{ $nodeId := printf "/zookeeper/nodes/%s/id" $node }}
-{{ if exists $nodeId }}server.{{ getv $nodeId }}={{ $node }}:2781:2888:participant;3888{{ end }}
+{{ range $node := lsdir "/zookeeper/nodes" }}{{ $nodeId := printf "/zookeeper/nodes/%s/id" $node }}{{ if exists $nodeId }}server.{{ getv $nodeId }}={{ $node }}:2181:2888:participant;{{ $node }}:3888{{ end }}
 {{ end }}

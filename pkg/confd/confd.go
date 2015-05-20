@@ -24,13 +24,13 @@ var (
 )
 
 // WaitForInitialConf wait until the compilation of the templates is correct
-func WaitForInitialConf(signalChan chan os.Signal, etcd []string, timeout time.Duration) {
+func WaitForInitialConf(etcd []string, timeout time.Duration) {
 	log.Info("waiting for confd to write initial templates...")
 	for {
 		cmdAsString := fmt.Sprintf("confd -onetime -node %v -confdir /app", strings.Join(etcd, ","))
 		log.Debugf("running %s", cmdAsString)
 		cmd, args := oswrapper.BuildCommandFromString(cmdAsString)
-		err := oswrapper.RunCommand(signalChan, cmd, args, false)
+		err := oswrapper.RunCommand(cmd, args)
 		if err == nil {
 			break
 		}
