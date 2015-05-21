@@ -48,7 +48,9 @@ func (mb *MesosBoot) PreBoot(currentBoot *types.CurrentBoot) {
 }
 
 func (mb *MesosBoot) BootDaemons(currentBoot *types.CurrentBoot) []*types.ServiceDaemon {
-	return []*types.ServiceDaemon{&types.ServiceDaemon{Command: "mesos-master", Args: gatherArgs(currentBoot.EtcdClient)}}
+	args := gatherArgs(currentBoot.EtcdClient)
+	args = append(args, "--ip="+currentBoot.Host.String())
+	return []*types.ServiceDaemon{&types.ServiceDaemon{Command: "mesos-master", Args: args}}
 }
 
 func (mb *MesosBoot) WaitForPorts() []int {
