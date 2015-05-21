@@ -13,11 +13,19 @@ func New() *logrus.Logger {
 	log.Formatter = new(StdOutFormatter)
 
 	logLevel := os.Getenv("LOG_LEVEL")
+	setLogLevel(logLevel, log)
+
+	return log
+}
+
+func SetLevel(logLevel string, log *logrus.Logger) {
+	setLogLevel(logLevel, log)
+}
+
+func setLogLevel(logLevel string, log *logrus.Logger) {
 	if logLevel != "" {
 		if level, err := logrus.ParseLevel(logLevel); err == nil {
 			log.Level = level
 		}
 	}
-
-	return log
 }
