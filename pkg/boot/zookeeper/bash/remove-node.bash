@@ -11,7 +11,7 @@ main() {
   ACTUAL_SERVERS=$(/opt/zookeeper/bin/zkCli.sh -server "$ZKHOST" config | grep "^server.")
 
   if echo "$ACTUAL_SERVERS" | grep -q "$HOST"; then
-    echo "REMOVING $HOST server from zookeeper cluster"
+    echo "Removing $HOST server from zookeeper cluster"
     echo ""
     /opt/zookeeper/bin/zkCli.sh -server "$ZKHOST" reconfig -remove "$(cat /opt/zookeeper-data/data/myid)"
   fi
