@@ -11,7 +11,7 @@ TimeoutStartSec=0
 ExecStartPre=-/usr/bin/docker kill mesos-slave
 ExecStartPre=-/usr/bin/docker rm mesos-slave
 ExecStartPre=/usr/bin/docker pull aledbf/mesos-slave:0.0.1
-ExecStart=/usr/bin/sh -c "/usr/bin/docker run \
+ExecStart=/usr/bin/sh -c "ZKNODES=$(/opt/bin/zkNodeUrls -peers=$COREOS_PRIVATE_IPV4:4001) && /usr/bin/docker run \
   --name=mesos-slave \
   --net=host \
   --privileged \
@@ -22,7 +22,7 @@ ExecStart=/usr/bin/sh -c "/usr/bin/docker run \
   aledbf/mesos-slave:0.0.1 \
   --ip=$COREOS_PRIVATE_IPV4 \
   --containerizers=docker \
-  --master=zk://<ZK_IP>:2181/mesos \
+  --master=zk://$ZKNODES/mesos \
   --work_dir=/var/lib/mesos/slave \
   --log_dir=/var/log/mesos/slave"
 ExecStop=/usr/bin/docker stop mesos-slave

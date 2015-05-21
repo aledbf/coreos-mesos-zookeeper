@@ -11,13 +11,13 @@ TimeoutStartSec=0
 ExecStartPre=-/usr/bin/docker kill mesos-master
 ExecStartPre=-/usr/bin/docker rm mesos-master
 ExecStartPre=/usr/bin/docker pull aledbf/mesos-master:0.0.1
-ExecStart=/usr/bin/sh -c "/usr/bin/docker run \
+ExecStart=/usr/bin/sh -c "ZKNODES=$(/opt/bin/zkNodeUrls -peers=$COREOS_PRIVATE_IPV4:4001) && /usr/bin/docker run \
   --name=mesos-master \
   --privileged \
   --net=host \
   aledbf/mesos-master:0.0.1 \
   --ip=$COREOS_PRIVATE_IPV4
-  --zk=zk://<ZK_IP>:2181/mesos \
+  --zk=zk://$ZKNODES/mesos \
   --work_dir=/var/lib/mesos/master \
   --quorum=1"
 ExecStop=/usr/bin/docker stop mesos-master

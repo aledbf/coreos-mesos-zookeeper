@@ -28,3 +28,7 @@ mesos-slave: mesos
 
 zookeeper: build-go
 	docker build -t $(REPO)/$@:$(ZOOKEEPER_VERSION) zookeeper/.
+
+build-tools:
+	echo "Building tools..."
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o tools/zkNodeUrls pkg/boot/zookeeper/zkNodesUrl.go
