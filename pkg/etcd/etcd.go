@@ -82,7 +82,7 @@ func GetList(client *etcd.Client, key string) []string {
 		result = append(result, path.Base(node.Key))
 	}
 
-	log.Infof("getlist %s -> %v", key, result)
+	log.Debugf("getlist %s -> %v", key, result)
 	return result
 }
 
