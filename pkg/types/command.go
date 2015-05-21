@@ -1,7 +1,8 @@
 package types
 
 import (
-	"exec"
+	"io"
+	"os/exec"
 )
 
 type Command struct {

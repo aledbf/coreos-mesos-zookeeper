@@ -50,6 +50,11 @@ func RegisterComponent(component extpoints.BootComponent, name string) bool {
 // etcdPath is the base path used to publish the component in etcd
 // externalPort is the base path used to publish the component in etcd
 func Start(etcdPath string, externalPort int) {
+	go func() {
+		log.Debugf("starting pprof http server in port 6060")
+		http.ListenAndServe("localhost:6060", nil)
+	}()
+
 	signal.Notify(signalChan,
 		syscall.SIGHUP,
 		syscall.SIGINT,
@@ -103,11 +108,6 @@ func Start(etcdPath string, externalPort int) {
 	// a signal is received during the boot process
 	go start(currentBoot)
 
-	go func() {
-		log.Debugf("starting pprof http server in port 6060")
-		http.ListenAndServe("localhost:6060", nil)
-	}()
-
 	code := <-exitChan
 
 	// pre shutdown tasks
@@ -137,7 +137,7 @@ func start(currentBoot *types.CurrentBoot) {
 		time.Sleep(timeout + 1)
 
 		// wait for confd to run once and install initial templates
-		confd.WaitForInitialConf(signalChan, currentBoot.ConfdNodes, currentBoot.Timeout)
+		confd.WaitForInitialConf(currentBoot.ConfdNodes, currentBoot.Timeout)
 	}
 
 	log.Debug("running pre boot scripts")
@@ -146,7 +146,7 @@ func start(currentBoot *types.CurrentBoot) {
 
 	if component.UseConfd() {
 		// spawn confd in the background to update services based on etcd changes
-		// go confd.Launch(signalChan, currentBoot.ConfdNodes)
+		go confd.Launch(signalChan, currentBoot.ConfdNodes)
 	}
 
 	log.Debug("running boot daemons")

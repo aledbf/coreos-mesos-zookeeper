@@ -1,5 +1,3 @@
 FROM aledbf/mesos-template:VERSION
 
-CMD ["--registry=in_memory"]
-
-ENTRYPOINT ["mesos-master"]
+ENTRYPOINT ["/app/bin/boot"]
