@@ -9,13 +9,7 @@ main() {
   cp /app/zoo.cfg /opt/zookeeper-data/zoo.cfg
   ln -s /opt/zookeeper-data/zoo.cfg /opt/zookeeper/conf/zoo.cfg
 
-  touch /opt/zookeeper-data/zoo_cfg.dynamic
-
-  if [[ -s "/opt/zookeeper-data/zoo_cfg.dynamic" ]] ; then
-    echo -n "already exists zookeeper cluster information"
-  else
-    cp /opt/zookeeper/conf/fleet-zoo_cfg.dynamic /opt/zookeeper-data/zoo_cfg.dynamic
-  fi
+  cp /opt/zookeeper/conf/fleet-zoo_cfg.dynamic /opt/zookeeper-data/zoo_cfg.dynamic
 
   # We need to add this node to the cluster if is not configured in the cluster
   ZKHOST=$(sed -e "s/$HOST:3888//;s/^,//;s/,$//" < /opt/zookeeper/conf/server.list | cut -d ',' -f 1)
