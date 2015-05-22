@@ -12,7 +12,7 @@ ExecStartPre=/bin/sh -c "docker inspect zookeeper-data >/dev/null 2>&1 || docker
 ExecStartPre=-/usr/bin/docker kill zookeeper
 ExecStartPre=-/usr/bin/docker rm zookeeper
 ExecStartPre=/usr/bin/docker pull aledbf/zookeeper:3.5.0
-ExecStart=/usr/bin/docker run -e EXTERNAL_PORT=2181 -e HOST=$COREOS_PRIVATE_IPV4 -e LOG_LEVEL=debug -v /var/run/fleet.sock:/var/run/fleet.sock --net=host --rm --name zookeeper --volumes-from=zookeeper-data aledbf/zookeeper:3.5.0
+ExecStart=/bin/sh -c "/usr/bin/docker run -e EXTERNAL_PORT=2181 -e HOST=$COREOS_PRIVATE_IPV4 -e LOG_LEVEL=debug -v /var/run/fleet.sock:/var/run/fleet.sock --net=host --rm --name zookeeper --volumes-from=zookeeper-data aledbf/zookeeper:3.5.0"
 ExecStop=/usr/bin/docker stop zookeeper
 
 [Install]
