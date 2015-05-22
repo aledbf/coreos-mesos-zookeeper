@@ -6,7 +6,8 @@ ZOOKEEPER_VERSION = 3.5.0
 build: zookeeper-go build-tools mesos-template mesos-master mesos-slave zookeeper
 
 mesos-go:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o mesos/bin/boot pkg/boot/mesos/master/main.go
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o mesos/bin/master-boot pkg/boot/mesos/master/main.go
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o mesos/bin/slave-boot pkg/boot/mesos/slave/main.go
 
 zookeeper-go:
 	echo "Building..."
@@ -23,7 +24,7 @@ mesos-master: mesos-go mesos-template
 	docker build -t $(REPO)/$@:$(MESOS_VERSION) mesos/.
 	rm -f mesos/Dockerfile
 
-mesos-slave: mesos-template
+mesos-slave: mesos-go mesos-template
 	sed "s/VERSION/$(MESOS)/g" mesos/slave > mesos/Dockerfile
 	docker build -t $(REPO)/$@:$(MESOS_VERSION) mesos/.
 	rm -f mesos/Dockerfile

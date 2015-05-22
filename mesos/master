@@ -1,3 +1,5 @@
 FROM aledbf/mesos-template:VERSION
 
+COPY bin/master-boot /app/bin/boot
+
 ENTRYPOINT ["/app/bin/boot"]

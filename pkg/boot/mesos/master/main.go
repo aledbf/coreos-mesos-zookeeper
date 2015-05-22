@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/boot"
@@ -9,7 +8,7 @@ import (
 	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/os"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/types"
-	goetcd "github.com/coreos/go-etcd/etcd"
+	goetcd "github.com/coreos/go-etcd/etcd" // TODO: avoid external packages
 )
 
 const (
@@ -50,6 +49,8 @@ func (mb *MesosBoot) PreBoot(currentBoot *types.CurrentBoot) {
 func (mb *MesosBoot) BootDaemons(currentBoot *types.CurrentBoot) []*types.ServiceDaemon {
 	args := gatherArgs(currentBoot.EtcdClient)
 	args = append(args, "--ip="+currentBoot.Host.String())
+	args = append(args, "--hostname="+currentBoot.Host.String())
+	log.Infof("mesos master args: %v", args)
 	return []*types.ServiceDaemon{&types.ServiceDaemon{Command: "mesos-master", Args: args}}
 }
 
@@ -86,12 +87,8 @@ func gatherArgs(c *goetcd.Client) []string {
 		hosts = append(hosts, node+":3888")
 	}
 	zkHosts := strings.Join(hosts, ",")
-	args = append(args, "--zk="+zkHosts+"/mesos")
-
-	// set quorum based on num zk hosts
-	l := len(nodes)
-	args = append(args, fmt.Sprintf("--quorum=%v", l/2+1))
-	// set a work directory
+	args = append(args, "--zk=zk://"+zkHosts+"/mesos")
+	args = append(args, "--quorum=1")
 	args = append(args, "--work_dir=/tmp/mesos-master")
 
 	return args

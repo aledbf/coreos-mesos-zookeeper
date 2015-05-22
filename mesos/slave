@@ -1,3 +1,5 @@
 FROM aledbf/mesos-template:VERSION
 
-ENTRYPOINT ["mesos-slave"]
+COPY bin/slave-boot /app/bin/boot
+
+ENTRYPOINT ["/app/bin/boot"]
