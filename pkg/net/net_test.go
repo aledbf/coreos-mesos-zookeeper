@@ -2,6 +2,7 @@ package net
 
 import (
 	"net"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -16,7 +17,7 @@ func TestListenTCP(t *testing.T) {
 
 	port := listeningPort.Addr()
 	effectivePort := strings.Split(port.String(), ":")[1]
-	err = WaitForPort("tcp", "127.0.0.1", effectivePort, 5*time.Second)
+	err = WaitForPort("tcp", "127.0.0.1", strconv.Itoa(effectivePort), 5*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,7 +32,7 @@ func TestListenUDP(t *testing.T) {
 
 	port := listeningPort.Addr()
 	effectivePort := strings.Split(port.String(), ":")[1]
-	err = WaitForPort("udp", "127.0.0.1", effectivePort, 5*time.Second)
+	err = WaitForPort("udp", "127.0.0.1", strconv.Itoa(effectivePort), 5*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}

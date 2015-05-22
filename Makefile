@@ -3,6 +3,17 @@ MESOS = 0.22.1-1.0.ubuntu1404
 MESOS_VERSION = 0.22.1
 ZOOKEEPER_VERSION = 3.5.0
 
+repo_path = github.com/aledbf/coreos-mesos-zookeeper
+
+GO = godep go
+GOFMT = gofmt -l
+GOLINT = golint
+GOTEST = $(GO) test --cover --race -v
+GOVET = $(GO) vet
+
+GO_PACKAGES = pkg/boot pkg/confd pkg/etcd pkg/fleet pkg/log pkg/net
+GO_PACKAGES_REPO_PATH = $(addprefix $(repo_path)/,$(GO_PACKAGES))
+
 build: zookeeper-go build-tools mesos-template mesos-master mesos-slave zookeeper
 
 mesos-go:
@@ -35,3 +46,11 @@ zookeeper: zookeeper-go
 build-tools:
 	echo "Building tools..."
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o tools/zkNodeUrls pkg/boot/zookeeper/main/zkNodesUrl.go
+
+test-style:
+	@$(GOFMT) $(GO_PACKAGES)
+	@$(GOFMT) $(GO_PACKAGES) | read; if [ $$? == 0 ]; then echo "gofmt check failed."; exit 1; fi
+	$(GOVET) $(GO_PACKAGES_REPO_PATH)
+	@for i in $(addsuffix /...,$(GO_PACKAGES)); do \
+		$(GOLINT) $$i; \
+	done

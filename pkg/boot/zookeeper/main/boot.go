@@ -33,7 +33,7 @@ func main() {
 
 	host := oswrapper.Getopt("HOST", "127.0.0.1")
 	etcdCtlPeers := oswrapper.Getopt("ETCDCTL_PEERS", "127.0.0.1")
-	etcdClient := etcd.NewClient(getHttpEtcdUrls(host, etcdCtlPeers, 4001))
+	etcdClient := etcd.NewClient(getHTTPEtcdUrls(host, etcdCtlPeers, 4001))
 
 	zkServer := &zookeeper.ZkServer{
 		Stdout: os.Stdout,
@@ -76,8 +76,8 @@ func main() {
 
 	// we need to write the file /opt/zookeeper-data/data/myid with the id of this node
 	os.MkdirAll("/opt/zookeeper-data/data", 0640)
-	zkId := etcd.Get(etcdClient, etcdPath+"/"+host+"/id")
-	ioutil.WriteFile("/opt/zookeeper-data/data/myid", []byte(zkId), 0640)
+	zkID := etcd.Get(etcdClient, etcdPath+"/"+host+"/id")
+	ioutil.WriteFile("/opt/zookeeper-data/data/myid", []byte(zkID), 0640)
 
 	// wait for confd to run once and install initial templates
 	confd.WaitForInitialConf(getConfdNodes(host, etcdCtlPeers, 4001), 10*time.Second)
@@ -127,7 +127,7 @@ func getConfdNodes(host, etcdCtlPeers string, port int) []string {
 }
 
 // getEtcdHosts returns an array of urls that contains at least one host
-func getHttpEtcdUrls(host, etcdCtlPeers string, port int) []string {
+func getHTTPEtcdUrls(host, etcdCtlPeers string, port int) []string {
 	result := []string{"http://" + host + ":" + strconv.Itoa(port)}
 
 	if etcdCtlPeers != "127.0.0.1" {

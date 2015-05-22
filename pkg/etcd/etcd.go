@@ -108,8 +108,8 @@ func Create(client *etcd.Client, key, value string, ttl uint64) {
 // PublishService publish a service to etcd periodically
 func PublishService(
 	client *etcd.Client,
-	host string,
 	etcdPath string,
+	host string,
 	externalPort int,
 	ttl uint64,
 	timeout time.Duration) {

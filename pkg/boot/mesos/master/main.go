@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	etcdPath = os.Getopt("ETCD_PATH", "/deis/mesos/master")
+	etcdPath = os.Getopt("ETCD_PATH", "/mesos/master")
 	log      = logger.New()
 )
 

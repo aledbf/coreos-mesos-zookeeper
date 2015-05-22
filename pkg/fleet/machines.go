@@ -10,7 +10,7 @@ import (
 
 // GetMachines returns the ip address of the nodes with all the specified roles
 func GetMachines(endpoint string, metadata map[string][]string) ([]string, error) {
-	fleetUrl, err := url.Parse(endpoint)
+	fleetURL, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -18,11 +18,11 @@ func GetMachines(endpoint string, metadata map[string][]string) ([]string, error
 	dialFunc := net.Dial
 
 	// change configuration for socket communication using http
-	if fleetUrl.Scheme == "unix" {
-		sockPath := fleetUrl.Path
-		fleetUrl.Path = ""
-		fleetUrl.Scheme = "http"
-		fleetUrl.Host = "domain-sock"
+	if fleetURL.Scheme == "unix" {
+		sockPath := fleetURL.Path
+		fleetURL.Path = ""
+		fleetURL.Scheme = "http"
+		fleetURL.Host = "domain-sock"
 
 		dialFunc = func(network, addr string) (net.Conn, error) {
 			return net.Dial("unix", sockPath)
@@ -36,7 +36,7 @@ func GetMachines(endpoint string, metadata map[string][]string) ([]string, error
 		},
 	}
 
-	fleetClient, err := client.NewHTTPClient(httpClient, *fleetUrl)
+	fleetClient, err := client.NewHTTPClient(httpClient, *fleetURL)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func GetMachines(endpoint string, metadata map[string][]string) ([]string, error
 		return nil, err
 	}
 
-	machineList := make([]string, 0)
+	var machineList []string
 	for _, m := range machines {
 		if hasMetadata(m, metadata) {
 			machineList = append(machineList, m.PublicIP)

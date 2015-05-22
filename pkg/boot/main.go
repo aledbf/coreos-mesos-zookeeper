@@ -91,7 +91,7 @@ func Start(etcdPath string, externalPort int) {
 
 	host := oswrapper.Getopt("HOST", "127.0.0.1")
 	etcdCtlPeers := oswrapper.Getopt("ETCDCTL_PEERS", "127.0.0.1")
-	etcdClient := etcd.NewClient(getHttpEtcdUrls(host, etcdCtlPeers, etcdPort))
+	etcdClient := etcd.NewClient(getHTTPEtcdUrls(host, etcdCtlPeers, etcdPort))
 
 	currentBoot := &types.CurrentBoot{
 		ConfdNodes: getConfdNodes(host, etcdCtlPeers, etcdPort),
@@ -159,7 +159,7 @@ func start(currentBoot *types.CurrentBoot) {
 	log.Debugf("waiting for a service in the port %v", portsToWaitFor)
 	for _, portToWait := range portsToWaitFor {
 		if portToWait > 0 {
-			err := netwrapper.WaitForPort("tcp", "0.0.0.0", strconv.Itoa(portToWait), timeout)
+			err := netwrapper.WaitForPort("tcp", currentBoot.Host.String(), portToWait, timeout)
 			if err != nil {
 				log.Printf("%v", err)
 				signalChan <- syscall.SIGINT
@@ -171,11 +171,11 @@ func start(currentBoot *types.CurrentBoot) {
 	if currentBoot.Port > 0 {
 		log.Debug("starting periodic publication in etcd...")
 		log.Debugf("etcd publication path %s, host %s and port %v", currentBoot.EtcdPath, currentBoot.Host, currentBoot.Port)
-		go etcd.PublishService(currentBoot.EtcdClient, currentBoot.Host.String(), currentBoot.EtcdPath, currentBoot.Port, uint64(ttl.Seconds()), timeout)
-	}
+		go etcd.PublishService(currentBoot.EtcdClient, currentBoot.EtcdPath+"/"+currentBoot.Host.String(), currentBoot.Host.String(), currentBoot.Port, uint64(ttl.Seconds()), timeout)
 
-	// Wait for the first publication
-	time.Sleep(timeout / 2)
+		// Wait for the first publication
+		time.Sleep(timeout / 2)
+	}
 
 	log.Printf("running post boot scripts")
 	postBootScripts := component.PostBootScripts(currentBoot)
@@ -193,7 +193,7 @@ func start(currentBoot *types.CurrentBoot) {
 }
 
 // getEtcdHosts returns an array of urls that contains at least one host
-func getHttpEtcdUrls(host, etcdCtlPeers string, port int) []string {
+func getHTTPEtcdUrls(host, etcdCtlPeers string, port int) []string {
 	if etcdCtlPeers != "127.0.0.1" {
 		hosts := strings.Split(etcdCtlPeers, ",")
 		result := []string{}
@@ -201,9 +201,9 @@ func getHttpEtcdUrls(host, etcdCtlPeers string, port int) []string {
 			result = append(result, "http://"+_host+":"+strconv.Itoa(port))
 		}
 		return result
-	} else {
-		return []string{"http://" + host + ":" + strconv.Itoa(port)}
 	}
+
+	return []string{"http://" + host + ":" + strconv.Itoa(port)}
 }
 
 func getConfdNodes(host, etcdCtlPeers string, port int) []string {
@@ -214,9 +214,9 @@ func getConfdNodes(host, etcdCtlPeers string, port int) []string {
 			result = append(result, _host+":"+strconv.Itoa(port))
 		}
 		return result
-	} else {
-		return []string{host + ":" + strconv.Itoa(port)}
 	}
+
+	return []string{host + ":" + strconv.Itoa(port)}
 }
 
 func runAllScripts(signalChan chan os.Signal, scripts []*types.Script) {

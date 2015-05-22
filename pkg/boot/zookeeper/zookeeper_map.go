@@ -49,10 +49,10 @@ func CheckZkMappingInFleet(etcdPath string, etcdClient *goetcd.Client) {
 		// required role is not initialized (no zookeeper node id).
 		machinesNotInitialized := difference(machines, zkNodes)
 		if len(machinesNotInitialized) > 0 {
-			nextNodeId := getNextNodeId(etcdPath, etcdClient, zkNodes)
+			nextNodeID := getNextNodeID(etcdPath, etcdClient, zkNodes)
 			for _, zkNode := range machinesNotInitialized {
-				etcd.Set(etcdClient, etcdPath+"/"+zkNode+"/id", strconv.Itoa(nextNodeId), 0)
-				nextNodeId++
+				etcd.Set(etcdClient, etcdPath+"/"+zkNode+"/id", strconv.Itoa(nextNodeID), 0)
+				nextNodeID++
 			}
 		}
 	}
@@ -71,14 +71,14 @@ func getMachines() ([]string, error) {
 	return fleet.GetMachines(fleetEndpoint, metadata)
 }
 
-// getNextNodeId returns the next id to use as zookeeper node index
-func getNextNodeId(etcdPath string, etcdClient *goetcd.Client, nodes []string) int {
+// getNextNodeID returns the next id to use as zookeeper node index
+func getNextNodeID(etcdPath string, etcdClient *goetcd.Client, nodes []string) int {
 	result := 0
 	for _, node := range nodes {
 		id := etcd.Get(etcdClient, etcdPath+"/"+node+"/id")
-		numericId, err := strconv.Atoi(id)
-		if id != "" && err == nil && numericId > result {
-			result = numericId
+		numericID, err := strconv.Atoi(id)
+		if id != "" && err == nil && numericID > result {
+			result = numericID
 		}
 	}
 

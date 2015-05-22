@@ -1,93 +1,93 @@
 package main
 
 import (
-  "strings"
+	"strings"
 
-  "github.com/aledbf/coreos-mesos-zookeeper/pkg/boot"
-  "github.com/aledbf/coreos-mesos-zookeeper/pkg/etcd"
-  logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
-  "github.com/aledbf/coreos-mesos-zookeeper/pkg/os"
-  "github.com/aledbf/coreos-mesos-zookeeper/pkg/types"
-  goetcd "github.com/coreos/go-etcd/etcd" // TODO: avoid external packages
+	"github.com/aledbf/coreos-mesos-zookeeper/pkg/boot"
+	"github.com/aledbf/coreos-mesos-zookeeper/pkg/etcd"
+	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
+	"github.com/aledbf/coreos-mesos-zookeeper/pkg/os"
+	"github.com/aledbf/coreos-mesos-zookeeper/pkg/types"
+	goetcd "github.com/coreos/go-etcd/etcd" // TODO: avoid external packages
 )
 
 const (
-  mesosPort = 5051
+	mesosPort = 5051
 )
 
 var (
-  etcdPath = os.Getopt("ETCD_PATH", "/deis/mesos/slave")
-  log      = logger.New()
+	etcdPath = os.Getopt("ETCD_PATH", "/mesos/slave")
+	log      = logger.New()
 )
 
 func init() {
-  boot.RegisterComponent(new(MesosBoot), "boot")
+	boot.RegisterComponent(new(MesosBoot), "boot")
 }
 
 func main() {
-  boot.Start(etcdPath, mesosPort)
+	boot.Start(etcdPath, mesosPort)
 }
 
 type MesosBoot struct{}
 
 func (mb *MesosBoot) MkdirsEtcd() []string {
-  return []string{etcdPath}
+	return []string{etcdPath}
 }
 
 func (mb *MesosBoot) EtcdDefaults() map[string]string {
-  return map[string]string{}
+	return map[string]string{}
 }
 
 func (mb *MesosBoot) PreBootScripts(currentBoot *types.CurrentBoot) []*types.Script {
-  return []*types.Script{}
+	return []*types.Script{}
 }
 
 func (mb *MesosBoot) PreBoot(currentBoot *types.CurrentBoot) {
-  log.Info("mesos-slave: starting...")
+	log.Info("mesos-slave: starting...")
 }
 
 func (mb *MesosBoot) BootDaemons(currentBoot *types.CurrentBoot) []*types.ServiceDaemon {
-  args := gatherArgs(currentBoot.EtcdClient)
-  args = append(args, "--ip="+currentBoot.Host.String())
-  log.Infof("mesos slave args: %v", args)
-  return []*types.ServiceDaemon{&types.ServiceDaemon{Command: "mesos-slave", Args: args}}
+	args := gatherArgs(currentBoot.EtcdClient)
+	args = append(args, "--ip="+currentBoot.Host.String())
+	log.Infof("mesos slave args: %v", args)
+	return []*types.ServiceDaemon{&types.ServiceDaemon{Command: "mesos-slave", Args: args}}
 }
 
 func (mb *MesosBoot) WaitForPorts() []int {
-  return []int{mesosPort}
+	return []int{mesosPort}
 }
 
 func (mb *MesosBoot) PostBootScripts(currentBoot *types.CurrentBoot) []*types.Script {
-  return []*types.Script{}
+	return []*types.Script{}
 }
 
 func (mb *MesosBoot) PostBoot(currentBoot *types.CurrentBoot) {
-  log.Info("mesos-slave: running...")
+	log.Info("mesos-slave: running...")
 }
 
 func (mb *MesosBoot) ScheduleTasks(currentBoot *types.CurrentBoot) []*types.Cron {
-  return []*types.Cron{}
+	return []*types.Cron{}
 }
 
 func (mb *MesosBoot) UseConfd() bool {
-  return false
+	return false
 }
 
 func (mb *MesosBoot) PreShutdownScripts(currentBoot *types.CurrentBoot) []*types.Script {
-  return []*types.Script{}
+	return []*types.Script{}
 }
 
 func gatherArgs(c *goetcd.Client) []string {
-  var args []string
+	var args []string
 
-  nodes := etcd.GetList(c, "/zookeeper/nodes")
-  var hosts []string
-  for _, node := range nodes {
-    hosts = append(hosts, node+":3888")
-  }
-  zkHosts := strings.Join(hosts, ",")
-  args = append(args, "--master=zk://"+zkHosts+"/mesos")
-  args = append(args, "--containerizers=docker,mesos")
+	nodes := etcd.GetList(c, "/zookeeper/nodes")
+	var hosts []string
+	for _, node := range nodes {
+		hosts = append(hosts, node+":3888")
+	}
+	zkHosts := strings.Join(hosts, ",")
+	args = append(args, "--master=zk://"+zkHosts+"/mesos")
+	args = append(args, "--containerizers=docker,mesos")
 
-  return args
+	return args
 }

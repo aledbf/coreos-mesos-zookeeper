@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	zkUrlTemplate = "{{ range $index, $node := .nodes }}{{ if $index }},{{ end }}{{ $node }}:3888{{ end }}"
+	zkURLTemplate = "{{ range $index, $node := .nodes }}{{ if $index }},{{ end }}{{ $node }}:3888{{ end }}"
 	etcdPath      = "/zookeeper/nodes"
 )
 
@@ -38,7 +38,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	etcdClient := etcd.NewClient(getHttpEtcdUrls(*etcdPeers))
+	etcdClient := etcd.NewClient(getHTTPEtcdUrls(*etcdPeers))
 
 	zkNodes := etcd.GetList(etcdClient, etcdPath)
 
@@ -46,7 +46,7 @@ func main() {
 	data["nodes"] = zkNodes
 
 	t := template.New("zkTemplate")
-	t, err := t.Parse(zkUrlTemplate)
+	t, err := t.Parse(zkURLTemplate)
 	if err != nil {
 		panic(err)
 	}
@@ -59,7 +59,7 @@ func main() {
 }
 
 // getEtcdHosts returns an array of urls that contains at least one host
-func getHttpEtcdUrls(etcdPeers string) []string {
+func getHTTPEtcdUrls(etcdPeers string) []string {
 	hosts := strings.Split(etcdPeers, ",")
 	result := []string{}
 	for _, host := range hosts {

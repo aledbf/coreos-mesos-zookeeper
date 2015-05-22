@@ -2,14 +2,15 @@ package net
 
 import (
 	"net"
+	"strconv"
 	"strings"
 	"time"
 )
 
 // WaitForPort wait for successful network connection
-func WaitForPort(proto string, ip string, port string, timeout time.Duration) error {
+func WaitForPort(proto string, ip string, port int, timeout time.Duration) error {
 	for {
-		con, err := net.DialTimeout(proto, ip+":"+port, timeout)
+		con, err := net.DialTimeout(proto, ip+":"+strconv.Itoa(port), timeout)
 		if err == nil {
 			con.Close()
 			break
