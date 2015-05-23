@@ -1,4 +1,4 @@
-FROM aledbf/mesos-template:VERSION
+FROM aledbf/mesos-template:#VERSION#
 
 COPY bin/slave-boot /app/bin/boot
 

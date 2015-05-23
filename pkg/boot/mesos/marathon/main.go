@@ -3,6 +3,8 @@ package main
 import (
 	"strings"
 
+	"github.com/aledbf/coreos-mesos-zookeeper/pkg/boot/mesos/marathon/bindata"
+
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/boot"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/etcd"
 	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
@@ -12,11 +14,11 @@ import (
 )
 
 const (
-	mesosPort = 5051
+	mesosPort = 8180
 )
 
 var (
-	etcdPath = os.Getopt("ETCD_PATH", "/mesos/slave")
+	etcdPath = os.Getopt("ETCD_PATH", "/mesos/marathon")
 	log      = logger.New()
 )
 
@@ -39,18 +41,24 @@ func (mb *MesosBoot) EtcdDefaults() map[string]string {
 }
 
 func (mb *MesosBoot) PreBootScripts(currentBoot *types.CurrentBoot) []*types.Script {
+	params := make(map[string]string)
+	params["HOST"] = currentBoot.Host.String()
+	err := os.RunScript("pkg/boot/mesos/marathon/bash/update-hosts-file.bash", params, bindata.Asset)
+	if err != nil {
+		log.Printf("command finished with error: %v", err)
+	}
+
 	return []*types.Script{}
 }
 
 func (mb *MesosBoot) PreBoot(currentBoot *types.CurrentBoot) {
-	log.Info("mesos-slave: starting...")
+	log.Info("mesos-marathon: starting...")
 }
 
 func (mb *MesosBoot) BootDaemons(currentBoot *types.CurrentBoot) []*types.ServiceDaemon {
 	args := gatherArgs(currentBoot.EtcdClient)
-	args = append(args, "--ip="+currentBoot.Host.String())
-	log.Infof("mesos slave args: %v", args)
-	return []*types.ServiceDaemon{&types.ServiceDaemon{Command: "mesos-slave", Args: args}}
+	log.Infof("mesos marathon args: %v", args)
+	return []*types.ServiceDaemon{&types.ServiceDaemon{Command: "/marathon/bin/start", Args: args}}
 }
 
 func (mb *MesosBoot) WaitForPorts() []int {
@@ -62,7 +70,7 @@ func (mb *MesosBoot) PostBootScripts(currentBoot *types.CurrentBoot) []*types.Sc
 }
 
 func (mb *MesosBoot) PostBoot(currentBoot *types.CurrentBoot) {
-	log.Info("mesos-slave: running...")
+	log.Info("mesos-marathon: running...")
 }
 
 func (mb *MesosBoot) ScheduleTasks(currentBoot *types.CurrentBoot) []*types.Cron {
@@ -86,8 +94,12 @@ func gatherArgs(c *goetcd.Client) []string {
 		hosts = append(hosts, node+":3888")
 	}
 	zkHosts := strings.Join(hosts, ",")
-	args = append(args, "--master=zk://"+zkHosts+"/mesos")
-	args = append(args, "--containerizers=docker,mesos")
+	args = append(args, "--master", "zk://"+zkHosts+"/mesos")
+	args = append(args, "--zk", "zk://"+zkHosts+"/marathon")
+	// 20min task launch timeout for large docker image pulls
+	args = append(args, "--task_launch_timeout", "1200000")
+	args = append(args, "--ha")
+	args = append(args, "--http_port", "8180")
 
 	return args
 }

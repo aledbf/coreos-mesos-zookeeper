@@ -55,7 +55,7 @@ func (mb *MesosBoot) BootDaemons(currentBoot *types.CurrentBoot) []*types.Servic
 }
 
 func (mb *MesosBoot) WaitForPorts() []int {
-	return []int{mesosPort}
+	return []int{}
 }
 
 func (mb *MesosBoot) PostBootScripts(currentBoot *types.CurrentBoot) []*types.Script {

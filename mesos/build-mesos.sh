@@ -5,7 +5,7 @@ set -eo pipefail
 
 if [[ -z $DOCKER_BUILD ]]; then
   echo
-  echo "Note: this script is intended for use by the Dockerfile and not as a way to build the controller locally"
+  echo "Note: this script is intended for use by the Dockerfile and not as a way to build mesos locally"
   echo
   exit 1
 fi
@@ -19,7 +19,6 @@ apt-key adv --keyserver keyserver.ubuntu.com --recv E56151BF
 apt-get update && \
   apt-get -y install mesos=$MESOS
 
-# cleanup. indicate that python, libpq and libyanl are required packages.
 apt-get autoremove -y --purge && \
   apt-get clean -y && \
   rm -Rf /usr/share/man /usr/share/doc && \
