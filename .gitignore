@@ -1,2 +1,3 @@
 
-pkg/boot/zookeeper/bindata/*
+pkg/boot/zookeeper/bindata/bindata.go
+pkg/boot/mesos/marathon/bindata/bindata.go
