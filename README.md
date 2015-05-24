@@ -5,16 +5,15 @@ Services and images to start mesos and zookeeper in coreos
 - [X] zookeeper
   - [X] use alpine linux
   - [X] service unit
-  - [X] ~~command to generate configuration file~~ (included in boot)
   - [X] add node to the cluster on start
   - [X] remove node from the cluster on restart
 
-- [ ] mesos
-  - [ ] master
-  - [ ] service unit
-  - [ ] slave using global
-  - [ ] service unit
-
+- [X] mesos
+  - [X] master
+  - [X] service unit
+  - [X] slave using global
+  - [X] service unit
+- [X] marathon
 
 ### Why zookeeper 3.5.0-alpha?
 Starting in 3.5.0 is possible to resize the zookeeper cluster using [dynamic reconfiguration](http://zookeeper.apache.org/doc/trunk/zookeeperReconfig.html#ch_reconfig_dyn)
