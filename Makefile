@@ -3,7 +3,6 @@ MESOS = 0.22.1-1.0.ubuntu1404
 MESOS_VERSION = 0.22.1
 ZOOKEEPER_VERSION = 3.5.0
 
-SCALA_SBT = 0.13.5
 MARATHON_VERSION = 0.8.2-RC3
 
 repo_path = github.com/aledbf/coreos-mesos-zookeeper
@@ -24,11 +23,6 @@ mesos-go:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o mesos/bin/slave-boot pkg/boot/mesos/slave/main.go
 	go-bindata -pkg bindata -o pkg/boot/mesos/marathon/bindata/bindata.go pkg/boot/mesos/marathon/bash/; \
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o mesos/bin/marathon-boot pkg/boot/mesos/marathon/main.go
-
-zookeeper-go:
-	echo "Building..."
-	go-bindata -pkg bindata -o pkg/boot/zookeeper/bindata/bindata.go pkg/boot/zookeeper/bash/; \
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o zookeeper/bin/boot pkg/boot/zookeeper/main/boot.go
 
 mesos-template:
 	sed "s/#VERSION#/$(MESOS)/g" mesos/template > mesos/Dockerfile
@@ -61,9 +55,13 @@ mesos-marathon: build-mesos-marathon mesos-go
 zookeeper: zookeeper-go
 	docker build -t $(REPO)/$@:$(ZOOKEEPER_VERSION) zookeeper/.
 
+zookeeper-go:
+	echo "Building..."
+	go-bindata -pkg bindata -o pkg/boot/zookeeper/bindata/bindata.go pkg/boot/zookeeper/bash/; \
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o zookeeper/bin/boot pkg/boot/zookeeper/main/boot.go
+
 build-tools:
 	echo "Building tools..."
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o tools/zkNodeUrls pkg/boot/zookeeper/main/zkNodesUrl.go
 
 test-style:
 	@$(GOFMT) $(GO_PACKAGES)

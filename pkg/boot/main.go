@@ -2,7 +2,6 @@
 package boot
 
 import (
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,7 +16,7 @@ import (
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/confd"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/etcd"
 	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
-	netwrapper "github.com/aledbf/coreos-mesos-zookeeper/pkg/net"
+	"github.com/aledbf/coreos-mesos-zookeeper/pkg/net"
 	oswrapper "github.com/aledbf/coreos-mesos-zookeeper/pkg/os"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/types"
 	"github.com/robfig/cron"
@@ -155,11 +154,20 @@ func start(currentBoot *types.CurrentBoot) {
 		go oswrapper.RunProcessAsDaemon(signalChan, daemon.Command, daemon.Args)
 	}
 
+	ipToListen := "0.0.0.0"
+	netIfaces := net.GetNetworkInterfaces()
+	for _, iface := range netIfaces {
+		if iface.IP == currentBoot.Host.String() {
+			ipToListen = currentBoot.Host.String()
+			break
+		}
+	}
+
 	portsToWaitFor := component.WaitForPorts()
 	log.Debugf("waiting for a service in the port %v", portsToWaitFor)
 	for _, portToWait := range portsToWaitFor {
 		if portToWait > 0 {
-			err := netwrapper.WaitForPort("tcp", currentBoot.Host.String(), portToWait, timeout)
+			err := net.WaitForPort("tcp", ipToListen, portToWait, timeout)
 			if err != nil {
 				log.Printf("%v", err)
 				signalChan <- syscall.SIGINT
