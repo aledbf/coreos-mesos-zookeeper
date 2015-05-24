@@ -4,7 +4,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/coreos/go-etcd/etcd"
+	"github.com/aledbf/coreos-mesos-zookeeper/pkg/etcd"
 )
 
 // CurrentBoot information about the boot

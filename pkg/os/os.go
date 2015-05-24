@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
-	"time"
 
 	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
 
@@ -42,11 +41,6 @@ func RunProcessAsDaemon(signalChan chan os.Signal, command string, args []string
 		log.Errorf("an error ocurred executing command: [%s params %v], %v", command, args, err)
 		signalChan <- syscall.SIGKILL
 	}
-
-	defer func() {
-		// before we terminate the execution we wait for 5 seconds
-		time.Sleep(5 * time.Second)
-	}()
 
 	err = cmd.Wait()
 	log.Errorf("command finished with error: %v", err)
@@ -115,6 +109,7 @@ func Random(size int) (string, error) {
 	return string(bytes), nil
 }
 
+// Hostname returns the host name reported by the kernel.
 func Hostname() (name string, err error) {
 	return os.Hostname()
 }

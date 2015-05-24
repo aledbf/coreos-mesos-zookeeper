@@ -8,7 +8,6 @@ import (
 	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/os"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/types"
-	goetcd "github.com/coreos/go-etcd/etcd" // TODO: avoid external packages
 )
 
 const (
@@ -78,7 +77,7 @@ func (mb *MesosBoot) PreShutdownScripts(currentBoot *types.CurrentBoot) []*types
 	return []*types.Script{}
 }
 
-func gatherArgs(c *goetcd.Client) []string {
+func gatherArgs(c *etcd.Client) []string {
 	var args []string
 
 	nodes := etcd.GetList(c, "/zookeeper/nodes")

@@ -1,13 +1,12 @@
 package zookeeper
 
 import (
-	"github.com/Scalingo/go-etcd-lock/lock"
 	"strconv"
+	"time"
 
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/etcd"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/fleet"
 	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
-	goetcd "github.com/coreos/go-etcd/etcd"
 )
 
 const (
@@ -18,15 +17,12 @@ var (
 	log = logger.New()
 )
 
-func CheckZkMappingInFleet(etcdPath string, etcdClient *goetcd.Client) {
+func CheckZkMappingInFleet(etcdPath string, etcdClient *etcd.Client) {
 	// check if the nodes with the required role already have the an id. If not
 	// get fleet nodes with the required role and preassing the ids for every
 	// node in the cluster
-	l, err := lock.Acquire(etcdClient, "/zookeeper/masterLock", 60)
-	if lockErr, ok := err.(*lock.Error); ok {
-		log.Debug(lockErr)
-		return
-	} else if err != nil {
+	err := etcd.WaitForLock(etcdClient, "/zookeeper/masterLock", 60, 61*time.Second)
+	if err != nil {
 		panic(err)
 	}
 
@@ -58,7 +54,7 @@ func CheckZkMappingInFleet(etcdPath string, etcdClient *goetcd.Client) {
 	}
 
 	// release the etcd lock
-	l.Release()
+	etcd.ReleaseLock(etcdClient, "/zookeeper/masterLock")
 }
 
 // getMachines return the list of machines that can run zookeeper or an empty list
@@ -72,7 +68,7 @@ func getMachines() ([]string, error) {
 }
 
 // getNextNodeID returns the next id to use as zookeeper node index
-func getNextNodeID(etcdPath string, etcdClient *goetcd.Client, nodes []string) int {
+func getNextNodeID(etcdPath string, etcdClient *etcd.Client, nodes []string) int {
 	result := 0
 	for _, node := range nodes {
 		id := etcd.Get(etcdClient, etcdPath+"/"+node+"/id")

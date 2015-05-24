@@ -10,34 +10,38 @@ import (
 	"github.com/coreos/go-etcd/etcd"
 )
 
+type Client struct {
+	client *etcd.Client
+}
+
 var log = logger.New()
 
-// NewClient create a etcd client using the given machine list
-func NewClient(machines []string) *etcd.Client {
-	return etcd.NewClient(machines)
+// NewEtcdClient create a etcd client using the given machine list
+func NewClient(machines []string) *Client {
+	return &Client{etcd.NewClient(machines)}
 }
 
 // SetDefault sets the value of a key without expiration
-func SetDefault(client *etcd.Client, key, value string) {
+func SetDefault(client *Client, key, value string) {
 	Create(client, key, value, 0)
 }
 
 // Mkdir creates a directory only if does not exists
-func Mkdir(client *etcd.Client, path string) {
-	_, err := client.CreateDir(path, 0)
+func Mkdir(c *Client, path string) {
+	_, err := c.client.CreateDir(path, 0)
 	if err != nil {
 		log.Debug(err)
 	}
 }
 
 // WaitForKeys wait for the required keys up to the timeout or forever if is nil
-func WaitForKeys(client *etcd.Client, keys []string, ttl time.Duration) error {
+func WaitForKeys(c *Client, keys []string, ttl time.Duration) error {
 	start := time.Now()
 	wait := true
 
 	for {
 		for _, key := range keys {
-			_, err := client.Get(key, false, false)
+			_, err := c.client.Get(key, false, false)
 			if err != nil {
 				log.Debugf("key \"%s\" error %v", key, err)
 				wait = true
@@ -59,8 +63,8 @@ func WaitForKeys(client *etcd.Client, keys []string, ttl time.Duration) error {
 }
 
 // Get returns the value inside a key or an empty string
-func Get(client *etcd.Client, key string) string {
-	result, err := client.Get(key, false, false)
+func Get(c *Client, key string) string {
+	result, err := c.client.Get(key, false, false)
 	if err != nil {
 		log.Debugf("%v", err)
 		return ""
@@ -70,8 +74,8 @@ func Get(client *etcd.Client, key string) string {
 }
 
 // GetList returns the list of elements inside a key or an empty list
-func GetList(client *etcd.Client, key string) []string {
-	values, err := client.Get(key, true, false)
+func GetList(c *Client, key string) []string {
+	values, err := c.client.Get(key, true, false)
 	if err != nil {
 		log.Debugf("getlist %v", err)
 		return []string{}
@@ -88,18 +92,18 @@ func GetList(client *etcd.Client, key string) []string {
 
 // Set sets the value of a key.
 // If the ttl is bigger than 0 it will expire after the specified time
-func Set(client *etcd.Client, key, value string, ttl uint64) {
+func Set(c *Client, key, value string, ttl uint64) {
 	log.Debugf("set %s -> %s", key, value)
-	_, err := client.Set(key, value, ttl)
+	_, err := c.client.Set(key, value, ttl)
 	if err != nil {
 		log.Debugf("%v", err)
 	}
 }
 
 // Create set the value of a key only if it does not exits
-func Create(client *etcd.Client, key, value string, ttl uint64) {
+func Create(c *Client, key, value string, ttl uint64) {
 	log.Debugf("create %s -> %s", key, value)
-	_, err := client.Create(key, value, ttl)
+	_, err := c.client.Create(key, value, ttl)
 	if err != nil {
 		log.Debugf("%v", err)
 	}
@@ -107,7 +111,7 @@ func Create(client *etcd.Client, key, value string, ttl uint64) {
 
 // PublishService publish a service to etcd periodically
 func PublishService(
-	client *etcd.Client,
+	client *Client,
 	etcdPath string,
 	host string,
 	externalPort int,

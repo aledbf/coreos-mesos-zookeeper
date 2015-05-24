@@ -70,41 +70,6 @@
 			"Rev": "97e243d21a8e232e9d8af38ba2366dfcfceebeba"
 		},
 		{
-			"ImportPath": "github.com/deis/deis/pkg/boot",
-			"Comment": "v0.0.6-4175-g13afe32",
-			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
-		},
-		{
-			"ImportPath": "github.com/deis/deis/pkg/confd",
-			"Comment": "v0.0.6-4175-g13afe32",
-			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
-		},
-		{
-			"ImportPath": "github.com/deis/deis/pkg/etcd",
-			"Comment": "v0.0.6-4175-g13afe32",
-			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
-		},
-		{
-			"ImportPath": "github.com/deis/deis/pkg/log",
-			"Comment": "v0.0.6-4175-g13afe32",
-			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
-		},
-		{
-			"ImportPath": "github.com/deis/deis/pkg/net",
-			"Comment": "v0.0.6-4175-g13afe32",
-			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
-		},
-		{
-			"ImportPath": "github.com/deis/deis/pkg/os",
-			"Comment": "v0.0.6-4175-g13afe32",
-			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
-		},
-		{
-			"ImportPath": "github.com/deis/deis/pkg/types",
-			"Comment": "v0.0.6-4175-g13afe32",
-			"Rev": "13afe3250e1c3a181cc39c2bd6a9e12f5dfe31a6"
-		},
-		{
 			"ImportPath": "github.com/docker/libcontainer/netlink",
 			"Comment": "v1.2.0-160-g7294213",
 			"Rev": "72942137ef110d9468be3a4855b687d3734794df"

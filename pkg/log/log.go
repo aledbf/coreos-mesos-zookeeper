@@ -6,23 +6,27 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
+// Logger embed logrus Logger struct
+type Logger struct {
+	logrus.Logger
+}
+
 // New create a new logger using the StdOutFormatter and the level
 // specified in the env variable LOG_LEVEL
-func New() *logrus.Logger {
-	log := logrus.New()
+func New() *Logger {
+	log := &Logger{}
+
+	log.Out = os.Stdout
 	log.Formatter = new(StdOutFormatter)
 
 	logLevel := os.Getenv("LOG_LEVEL")
-	setLogLevel(logLevel, log)
+	log.SetLevel(logLevel)
 
 	return log
 }
 
-func SetLevel(logLevel string, log *logrus.Logger) {
-	setLogLevel(logLevel, log)
-}
-
-func setLogLevel(logLevel string, log *logrus.Logger) {
+// SetLevel change the level of the logger
+func (log *Logger) SetLevel(logLevel string) {
 	if logLevel != "" {
 		if level, err := logrus.ParseLevel(logLevel); err == nil {
 			log.Level = level
