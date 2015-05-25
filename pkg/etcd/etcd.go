@@ -14,6 +14,13 @@ type Client struct {
 	client *etcd.Client
 }
 
+type EtcdError struct {
+	ErrorCode int    `json:"errorCode"`
+	Message   string `json:"message"`
+	Cause     string `json:"cause,omitempty"`
+	Index     uint64 `json:"index"`
+}
+
 var log = logger.New()
 
 // NewEtcdClient create a etcd client using the given machine list
@@ -122,5 +129,15 @@ func PublishService(
 		Set(client, etcdPath+"/host", host, ttl)
 		Set(client, etcdPath+"/port", strconv.Itoa(externalPort), ttl)
 		time.Sleep(timeout)
+	}
+}
+
+func convertEtcdError(err error) *EtcdError {
+	etcdError := err.(*etcd.EtcdError)
+	return &EtcdError{
+		ErrorCode: etcdError.ErrorCode,
+		Message:   etcdError.Message,
+		Cause:     etcdError.Cause,
+		Index:     etcdError.Index,
 	}
 }

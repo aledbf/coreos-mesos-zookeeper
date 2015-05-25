@@ -7,8 +7,6 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/coreos/go-etcd/etcd"
 )
 
 func init() {
@@ -40,7 +38,7 @@ func TestGetSetEtcd(t *testing.T) {
 	startEtcd()
 	defer stopEtcd()
 
-	etcdClient := etcd.NewClient([]string{"http://localhost:4001"})
+	etcdClient := NewClient([]string{"http://localhost:4001"})
 	SetDefault(etcdClient, "/path", "value")
 	value := Get(etcdClient, "/path")
 
@@ -68,7 +66,7 @@ func TestMkdirEtcd(t *testing.T) {
 	startEtcd()
 	defer stopEtcd()
 
-	etcdClient := etcd.NewClient([]string{"http://localhost:4001"})
+	etcdClient := NewClient([]string{"http://localhost:4001"})
 
 	Mkdir(etcdClient, "/directory")
 	values := GetList(etcdClient, "/directory")
@@ -93,7 +91,7 @@ func TestWaitForKeysEtcd(t *testing.T) {
 	startEtcd()
 	defer stopEtcd()
 
-	etcdClient := etcd.NewClient([]string{"http://localhost:4001"})
+	etcdClient := NewClient([]string{"http://localhost:4001"})
 	Set(etcdClient, "/key", "value", 0)
 	start := time.Now()
 	err := WaitForKeys(etcdClient, []string{"/key"}, (10 * time.Second))
