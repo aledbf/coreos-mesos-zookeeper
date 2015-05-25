@@ -25,6 +25,7 @@ var log = logger.New()
 
 // NewEtcdClient create a etcd client using the given machine list
 func NewClient(machines []string) *Client {
+	log.Debugf("connecting to %v etcd server/s", machines)
 	return &Client{etcd.NewClient(machines)}
 }
 

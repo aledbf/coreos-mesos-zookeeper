@@ -40,7 +40,7 @@ func WaitForLock(c *Client, key string, ttl uint64, timeout time.Duration) error
 		case <-successChan:
 			return nil
 		case <-getTimeoutChan(timeout):
-			return errors.New("Timeout waiting for etcd lock")
+			return errors.New("timeout waiting for etcd lock")
 		default:
 			err := AcquireLock(c, key, ttl)
 			if err == nil {
