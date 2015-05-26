@@ -1,5 +1,5 @@
 [Unit]
-Description=Mesosphere
+Description=Mesosphere Marathon
 After=docker.service
 Requires=docker.service
 
@@ -20,4 +20,8 @@ ExecStop=-/usr/bin/docker stop coreos-mesos-marathon
 
 [Install]
 WantedBy=multi-user.target
+
+[X-Fleet]
+MachineMetadata=mesosMarathon=true
+Conflicts=coreos-mesos-marathon@*.service
 

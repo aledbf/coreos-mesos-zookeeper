@@ -27,5 +27,6 @@ ExecStop=/usr/bin/docker stop coreos-mesos-slave
 WantedBy=multi-user.target
 
 [X-Fleet]
-Global=true
+MachineMetadata=mesosSlave=true
+Conflicts=coreos-mesos-slave@*.service
 

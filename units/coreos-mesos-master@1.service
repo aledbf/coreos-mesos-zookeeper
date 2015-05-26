@@ -24,3 +24,7 @@ ExecStop=-/usr/bin/docker stop coreos-mesos-master
 [Install]
 WantedBy=multi-user.target
 
+[X-Fleet]
+MachineMetadata=mesosMaster=true
+Conflicts=coreos-mesos-master@*.service
+
