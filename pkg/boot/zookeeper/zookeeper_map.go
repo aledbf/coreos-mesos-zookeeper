@@ -2,7 +2,6 @@ package zookeeper
 
 import (
 	"strconv"
-	"time"
 
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/etcd"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/fleet"
@@ -10,18 +9,18 @@ import (
 )
 
 const (
-	fleetEndpoint = "unix:///var/run/fleet.sock"
+	etcdLock = "/zookeeper/setupLock"
 )
 
 var (
 	log = logger.New()
 )
 
-func CheckZkMappingInFleet(etcdPath string, etcdClient *etcd.Client) {
+func CheckZkMappingInFleet(etcdPath string, etcdClient *etcd.Client, etcdURL []string) {
 	// check if the nodes with the required role already have the an id. If not
 	// get fleet nodes with the required role and preassing the ids for every
 	// node in the cluster
-	err := etcd.WaitForLock(etcdClient, "/zookeeper/masterLock", 60, 61*time.Second)
+	err := etcd.AcquireLock(etcdClient, etcdLock, 10)
 	if err != nil {
 		panic(err)
 	}
@@ -29,15 +28,20 @@ func CheckZkMappingInFleet(etcdPath string, etcdClient *etcd.Client) {
 	zkNodes := etcd.GetList(etcdClient, etcdPath)
 	log.Debugf("zookeeper nodes %v", zkNodes)
 
-	machines, err := getMachines()
+	machines, err := getMachines(etcdURL)
 	if err != nil {
 		panic(err)
 	}
 	log.Debugf("machines %v", machines)
 
+	if len(machines) == 0 {
+		log.Fatal("there is no machine with valid metadata in the cluster to run zookeeper")
+	}
+
 	if len(zkNodes) == 0 {
 		log.Debug("initializing zookeeper cluster")
 		for index, newZkNode := range machines {
+			log.Debug("adding node %v to zookeeper cluster", newZkNode)
 			etcd.Set(etcdClient, etcdPath+"/"+newZkNode+"/id", strconv.Itoa(index+1), 0)
 		}
 	} else {
@@ -54,17 +58,17 @@ func CheckZkMappingInFleet(etcdPath string, etcdClient *etcd.Client) {
 	}
 
 	// release the etcd lock
-	etcd.ReleaseLock(etcdClient, "/zookeeper/masterLock")
+	etcd.ReleaseLock(etcdClient, etcdLock)
 }
 
 // getMachines return the list of machines that can run zookeeper or an empty list
-func getMachines() ([]string, error) {
+func getMachines(etcdURL []string) ([]string, error) {
 	metadata, err := fleet.ParseMetadata("zookeeper=true")
 	if err != nil {
 		panic(err)
 	}
 
-	return fleet.GetMachines(fleetEndpoint, metadata)
+	return fleet.GetMachinesWithMetadata(etcdURL, metadata)
 }
 
 // getNextNodeID returns the next id to use as zookeeper node index

@@ -26,14 +26,22 @@ var (
 )
 
 func main() {
-	go func() {
-		log.Debugf("starting pprof http server in port 6060")
-		http.ListenAndServe("localhost:6060", nil)
-	}()
-
 	host := oswrapper.Getopt("HOST", "127.0.0.1")
-	etcdCtlPeers := oswrapper.Getopt("ETCDCTL_PEERS", "127.0.0.1")
-	etcdClient := etcd.NewClient(getHTTPEtcdUrls(host, etcdCtlPeers, 4001))
+	etcdPort := oswrapper.Getopt("ETCD_PORT", "4001")
+	etcdCtlPeers := oswrapper.Getopt("ETCD_PEERS", "127.0.0.1:"+etcdPort)
+	etcdURL := etcd.GetHTTPEtcdUrls(host+":"+etcdPort, etcdCtlPeers)
+	etcdClient := etcd.NewClient(etcdURL)
+
+	etcd.Mkdir(etcdClient, etcdPath)
+
+	log.Info("zookeeper: starting...")
+
+	zookeeper.CheckZkMappingInFleet(etcdPath, etcdClient, etcdURL)
+
+	// we need to write the file /opt/zookeeper-data/data/myid with the id of this node
+	os.MkdirAll("/opt/zookeeper-data/data", 0640)
+	zkID := etcd.Get(etcdClient, etcdPath+"/"+host+"/id")
+	ioutil.WriteFile("/opt/zookeeper-data/data/myid", []byte(zkID), 0640)
 
 	zkServer := &zookeeper.ZkServer{
 		Stdout: os.Stdout,
@@ -68,17 +76,6 @@ func main() {
 		}
 	}()
 
-	etcd.Mkdir(etcdClient, etcdPath)
-
-	log.Info("zookeeper: starting...")
-
-	zookeeper.CheckZkMappingInFleet(etcdPath, etcdClient)
-
-	// we need to write the file /opt/zookeeper-data/data/myid with the id of this node
-	os.MkdirAll("/opt/zookeeper-data/data", 0640)
-	zkID := etcd.Get(etcdClient, etcdPath+"/"+host+"/id")
-	ioutil.WriteFile("/opt/zookeeper-data/data/myid", []byte(zkID), 0640)
-
 	// wait for confd to run once and install initial templates
 	confd.WaitForInitialConf(getConfdNodes(host, etcdCtlPeers, 4001), 10*time.Second)
 
@@ -99,6 +96,11 @@ func main() {
 
 	log.Info("zookeeper: running...")
 
+	go func() {
+		log.Debugf("starting pprof http server in port 6060")
+		http.ListenAndServe("localhost:6060", nil)
+	}()
+
 	code := <-exitChan
 	log.Debugf("execution terminated with exit code %v", code)
 
@@ -117,9 +119,9 @@ func getConfdNodes(host, etcdCtlPeers string, port int) []string {
 
 	if etcdCtlPeers != "127.0.0.1" {
 		hosts := strings.Split(etcdCtlPeers, ",")
-		result := []string{}
+		result = []string{}
 		for _, _host := range hosts {
-			result = append(result, _host+":"+strconv.Itoa(port))
+			result = append(result, _host)
 		}
 	}
 
@@ -128,13 +130,14 @@ func getConfdNodes(host, etcdCtlPeers string, port int) []string {
 
 // getEtcdHosts returns an array of urls that contains at least one host
 func getHTTPEtcdUrls(host, etcdCtlPeers string, port int) []string {
-	result := []string{"http://" + host + ":" + strconv.Itoa(port)}
+	result := []string{"http://" + host + ":" + strconv.Itoa(port) + "/"}
 
 	if etcdCtlPeers != "127.0.0.1" {
+		log.Debugf("using ETCD_PEERS [%v]", etcdCtlPeers)
 		hosts := strings.Split(etcdCtlPeers, ",")
-		result := []string{}
+		result = []string{}
 		for _, _host := range hosts {
-			result = append(result, "http://"+_host+":"+strconv.Itoa(port))
+			result = append(result, "http://"+_host+"/")
 		}
 	}
 

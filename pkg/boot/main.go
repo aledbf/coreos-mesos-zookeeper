@@ -89,8 +89,8 @@ func Start(etcdPath string, externalPort int) {
 	}
 
 	host := oswrapper.Getopt("HOST", "127.0.0.1")
-	etcdCtlPeers := oswrapper.Getopt("ETCDCTL_PEERS", "127.0.0.1")
-	etcdClient := etcd.NewClient(getHTTPEtcdUrls(host, etcdCtlPeers, etcdPort))
+	etcdCtlPeers := oswrapper.Getopt("ETCD_PEERS", "127.0.0.1:4001")
+	etcdClient := etcd.NewClient(etcd.GetHTTPEtcdUrls(host+":4001", etcdCtlPeers))
 
 	currentBoot := &types.CurrentBoot{
 		ConfdNodes: getConfdNodes(host, etcdCtlPeers, etcdPort),
@@ -198,20 +198,6 @@ func start(currentBoot *types.CurrentBoot) {
 	_cron.Start()
 
 	component.PostBoot(currentBoot)
-}
-
-// getEtcdHosts returns an array of urls that contains at least one host
-func getHTTPEtcdUrls(host, etcdCtlPeers string, port int) []string {
-	if etcdCtlPeers != "127.0.0.1" {
-		hosts := strings.Split(etcdCtlPeers, ",")
-		result := []string{}
-		for _, _host := range hosts {
-			result = append(result, "http://"+_host+":"+strconv.Itoa(port))
-		}
-		return result
-	}
-
-	return []string{"http://" + host + ":" + strconv.Itoa(port)}
 }
 
 func getConfdNodes(host, etcdCtlPeers string, port int) []string {
