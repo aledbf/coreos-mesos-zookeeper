@@ -4,14 +4,17 @@ import (
 	"errors"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 
 	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
 	"github.com/coreos/go-etcd/etcd"
+	etcdlock "github.com/leeor/etcd-sync"
 )
 
 type Client struct {
 	client *etcd.Client
+	lock   *etcdlock.EtcdMutex
 }
 
 type EtcdError struct {
@@ -26,7 +29,7 @@ var log = logger.New()
 // NewEtcdClient create a etcd client using the given machine list
 func NewClient(machines []string) *Client {
 	log.Debugf("connecting to %v etcd server/s", machines)
-	return &Client{etcd.NewClient(machines)}
+	return &Client{etcd.NewClient(machines), nil}
 }
 
 // SetDefault sets the value of a key without expiration
@@ -141,4 +144,18 @@ func convertEtcdError(err error) *EtcdError {
 		Cause:     etcdError.Cause,
 		Index:     etcdError.Index,
 	}
+}
+
+// GetHTTPEtcdUrls returns an array of urls that contains at least one host
+func GetHTTPEtcdUrls(host, etcdPeers string) []string {
+	if etcdPeers != "127.0.0.1:4001" {
+		hosts := strings.Split(etcdPeers, ",")
+		result := []string{}
+		for _, _host := range hosts {
+			result = append(result, "http://"+_host+":4001")
+		}
+		return result
+	}
+
+	return []string{"http://" + host}
 }
