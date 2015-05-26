@@ -25,9 +25,8 @@ import (
 )
 
 const (
-	timeout  time.Duration = 10 * time.Second
-	ttl      time.Duration = timeout * 2
-	etcdPort int           = 4001
+	timeout time.Duration = 10 * time.Second
+	ttl     time.Duration = timeout * 2
 )
 
 var (
@@ -92,8 +91,9 @@ func Start(etcdPath string, externalPort int) {
 	}
 
 	host := oswrapper.Getopt("HOST", "127.0.0.1")
-	etcdCtlPeers := oswrapper.Getopt("ETCD_PEERS", "127.0.0.1:4001")
-	etcdClient := etcd.NewClient(etcd.GetHTTPEtcdUrls(host+":4001", etcdCtlPeers))
+	etcdPort := oswrapper.Getopt("ETCD_PORT", "4001")
+	etcdCtlPeers := oswrapper.Getopt("ETCD_PEERS", "127.0.0.1:"+etcdPort)
+	etcdClient := etcd.NewClient(etcd.GetHTTPEtcdUrls(host+":"+etcdPort, etcdCtlPeers))
 
 	currentBoot := &types.CurrentBoot{
 		ConfdNodes: getConfdNodes(host, etcdCtlPeers, etcdPort),

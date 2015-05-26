@@ -43,14 +43,14 @@ func TestGetSetEtcd(t *testing.T) {
 	value := Get(etcdClient, "/path")
 
 	if value != "value" {
-		t.Fatalf("Expected '%v' arguments but returned '%v'", "value", value)
+		t.Fatalf("Expected '%v' but returned '%v'", "value", value)
 	}
 
 	Set(etcdClient, "/path", "", 0)
 	value = Get(etcdClient, "/path")
 
 	if value != "" {
-		t.Fatalf("Expected '%v' arguments but returned '%v'", "", value)
+		t.Fatalf("Expected '%v' but returned '%v'", "", value)
 	}
 
 	Set(etcdClient, "/path", "value", uint64((1 * time.Second).Seconds()))
@@ -58,7 +58,7 @@ func TestGetSetEtcd(t *testing.T) {
 	value = Get(etcdClient, "/path")
 
 	if value != "" {
-		t.Fatalf("Expected '%v' arguments but returned '%v'", "", value)
+		t.Fatalf("Expected '%v' but returned '%v'", "", value)
 	}
 }
 
@@ -70,20 +70,20 @@ func TestMkdirEtcd(t *testing.T) {
 
 	Mkdir(etcdClient, "/directory")
 	values := GetList(etcdClient, "/directory")
-	if len(values) != 0 {
-		t.Fatalf("Expected '%v' arguments but returned '%v'", 0, len(values))
+	if len(values) != 2 {
+		t.Fatalf("Expected '%v' but returned '%v'", 0, len(values))
 	}
 
 	Set(etcdClient, "/directory/item_1", "value", 0)
 	Set(etcdClient, "/directory/item_2", "value", 0)
 	values = GetList(etcdClient, "/directory")
 	if len(values) != 2 {
-		t.Fatalf("Expected '%v' arguments but returned '%v'", 2, len(values))
+		t.Fatalf("Expected '%v' but returned '%v'", 2, len(values))
 	}
 
 	lsResult := []string{"item_1", "item_2"}
 	if !reflect.DeepEqual(values, lsResult) {
-		t.Fatalf("Expected '%v' arguments but returned '%v'", lsResult, values)
+		t.Fatalf("Expected '%v'  but returned '%v'", lsResult, values)
 	}
 }
 

@@ -63,6 +63,9 @@ zookeeper-go:
 build-tools:
 	echo "Building tools..."
 
+test: test-style
+	go test -cover -timeout 10s ./...
+
 test-style:
 	@$(GOFMT) $(GO_PACKAGES)
 	@$(GOFMT) $(GO_PACKAGES) | read; if [ $$? == 0 ]; then echo "gofmt check failed."; exit 1; fi
