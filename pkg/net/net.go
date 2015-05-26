@@ -63,6 +63,7 @@ func GetNetworkInterfaces() []InterfaceIPAddress {
 	return result
 }
 
+// ParseIP parses s as an IP address
 func ParseIP(s string) net.IP {
 	return net.ParseIP(s)
 }

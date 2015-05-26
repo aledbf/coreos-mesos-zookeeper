@@ -63,7 +63,7 @@ zookeeper-go:
 build-tools:
 	echo "Building tools..."
 
-test: test-style
+test: test-style mesos-go mesos-zookeeper
 	go test -cover -timeout 10s ./...
 
 test-style:
