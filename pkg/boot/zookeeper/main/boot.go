@@ -17,6 +17,7 @@ import (
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/etcd"
 	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
 	oswrapper "github.com/aledbf/coreos-mesos-zookeeper/pkg/os"
+	"github.com/aledbf/coreos-mesos-zookeeper/version"
 )
 
 var (
@@ -34,6 +35,7 @@ func main() {
 
 	etcd.Mkdir(etcdClient, etcdPath)
 
+	log.Infof("boot version [%v]", version.Version)
 	log.Info("zookeeper: starting...")
 
 	zookeeper.CheckZkMappingInFleet(etcdPath, etcdClient, etcdURL)
