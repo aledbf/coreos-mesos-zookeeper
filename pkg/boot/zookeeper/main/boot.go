@@ -129,19 +129,3 @@ func getConfdNodes(host, etcdCtlPeers string, port int) []string {
 
 	return result
 }
-
-// getEtcdHosts returns an array of urls that contains at least one host
-func getHTTPEtcdUrls(host, etcdCtlPeers string, port int) []string {
-	result := []string{"http://" + host + ":" + strconv.Itoa(port) + "/"}
-
-	if etcdCtlPeers != "127.0.0.1" {
-		log.Debugf("using ETCD_PEERS [%v]", etcdCtlPeers)
-		hosts := strings.Split(etcdCtlPeers, ",")
-		result = []string{}
-		for _, _host := range hosts {
-			result = append(result, "http://"+_host+"/")
-		}
-	}
-
-	return result
-}

@@ -19,6 +19,7 @@ import (
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/net"
 	oswrapper "github.com/aledbf/coreos-mesos-zookeeper/pkg/os"
 	"github.com/aledbf/coreos-mesos-zookeeper/pkg/types"
+	"github.com/aledbf/coreos-mesos-zookeeper/version"
 	"github.com/robfig/cron"
 	_ "net/http/pprof"
 )
@@ -49,6 +50,8 @@ func RegisterComponent(component extpoints.BootComponent, name string) bool {
 // etcdPath is the base path used to publish the component in etcd
 // externalPort is the base path used to publish the component in etcd
 func Start(etcdPath string, externalPort int) {
+	log.Infof("boot version [%v]", version.Version)
+
 	go func() {
 		log.Debugf("starting pprof http server in port 6060")
 		http.ListenAndServe("localhost:6060", nil)
@@ -154,6 +157,8 @@ func start(currentBoot *types.CurrentBoot) {
 		go oswrapper.RunProcessAsDaemon(signalChan, daemon.Command, daemon.Args)
 	}
 
+	// if the returned ips contains the value contained in $HOST it means
+	// that we are running docker with --net=host
 	ipToListen := "0.0.0.0"
 	netIfaces := net.GetNetworkInterfaces()
 	for _, iface := range netIfaces {
