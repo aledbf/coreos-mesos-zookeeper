@@ -8,7 +8,6 @@ EnvironmentFile=/etc/environment
 Restart=on-failure
 RestartSec=20
 TimeoutStartSec=0
-ExecStartPre=/bin/bash -c "curl -sSL -o /opt/bin/zkNodeUrls https://soficom.s3.amazonaws.com/zkNodeUrls && chmod +x /opt/bin/zkNodeUrls"
 ExecStartPre=-/usr/bin/docker kill coreos-mesos-master
 ExecStartPre=-/usr/bin/docker rm coreos-mesos-master
 ExecStartPre=/bin/sh -c "docker inspect coreos-mesos-master-data >/dev/null 2>&1 || docker run --name coreos-mesos-master-data -v /tmp/mesos-master alpine:3.1 /bin/true"
