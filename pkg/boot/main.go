@@ -91,9 +91,9 @@ func Start(etcdPath string, externalPort int) {
 	}
 
 	host := oswrapper.Getopt("HOST", "127.0.0.1")
-	etcdPort := oswrapper.Getopt("ETCD_PORT", "4001")
-	etcdCtlPeers := oswrapper.Getopt("ETCD_PEERS", "127.0.0.1:"+etcdPort)
-	etcdClient := etcd.NewClient(etcd.GetHTTPEtcdUrls(host+":"+etcdPort, etcdCtlPeers))
+	etcdPort, _ := strconv.Atoi(oswrapper.Getopt("ETCD_PORT", "4001"))
+	etcdCtlPeers := oswrapper.Getopt("ETCD_PEERS", "127.0.0.1:"+strconv.Itoa(etcdPort))
+	etcdClient := etcd.NewClient(etcd.GetHTTPEtcdUrls(host+":"+strconv.Itoa(etcdPort), etcdCtlPeers))
 
 	currentBoot := &types.CurrentBoot{
 		ConfdNodes: getConfdNodes(host, etcdCtlPeers, etcdPort),
