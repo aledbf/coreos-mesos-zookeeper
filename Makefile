@@ -16,7 +16,7 @@ GOVET = $(GO) vet
 GO_PACKAGES = pkg/boot pkg/confd pkg/etcd pkg/fleet pkg/log pkg/net
 GO_PACKAGES_REPO_PATH = $(addprefix $(repo_path)/,$(GO_PACKAGES))
 
-build: zookeeper-go build-tools mesos-template mesos-master mesos-slave mesos-marathon zookeeper
+build: test-style zookeeper-go build-tools mesos-template mesos-master mesos-slave mesos-marathon zookeeper
 
 mesos-go:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o mesos/bin/master-boot pkg/boot/mesos/master/main.go
@@ -63,7 +63,7 @@ zookeeper-go:
 build-tools:
 	echo "Building tools..."
 
-test: test-style mesos-go mesos-zookeeper
+test: mesos-go zookeeper-go
 	go test -cover -timeout 10s ./...
 
 test-style:

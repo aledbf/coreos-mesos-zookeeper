@@ -12,12 +12,14 @@ import (
 	etcdlock "github.com/leeor/etcd-sync"
 )
 
+// Client etcd client
 type Client struct {
 	client *etcd.Client
 	lock   *etcdlock.EtcdMutex
 }
 
-type EtcdError struct {
+// Error etcd error
+type Error struct {
 	ErrorCode int    `json:"errorCode"`
 	Message   string `json:"message"`
 	Cause     string `json:"cause,omitempty"`
@@ -26,7 +28,7 @@ type EtcdError struct {
 
 var log = logger.New()
 
-// NewEtcdClient create a etcd client using the given machine list
+// NewClient create a etcd client using the given machine list
 func NewClient(machines []string) *Client {
 	log.Debugf("connecting to %v etcd server/s", machines)
 	return &Client{etcd.NewClient(machines), nil}
@@ -136,9 +138,9 @@ func PublishService(
 	}
 }
 
-func convertEtcdError(err error) *EtcdError {
+func convertEtcdError(err error) *Error {
 	etcdError := err.(*etcd.EtcdError)
-	return &EtcdError{
+	return &Error{
 		ErrorCode: etcdError.ErrorCode,
 		Message:   etcdError.Message,
 		Cause:     etcdError.Cause,

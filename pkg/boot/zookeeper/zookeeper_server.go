@@ -12,6 +12,7 @@ type ZkServer struct {
 	cmd *exec.Cmd
 }
 
+// Start starts a zookeeper server
 func (srv *ZkServer) Start() error {
 	srv.cmd = exec.Command("/opt/zookeeper/bin/zkServer.sh", "start-foreground")
 	srv.cmd.Stdout = srv.Stdout
@@ -19,10 +20,12 @@ func (srv *ZkServer) Start() error {
 	return srv.cmd.Start()
 }
 
+// Pid returns the process id of the running zookeeper server
 func (srv *ZkServer) Pid() int {
 	return srv.cmd.Process.Pid
 }
 
+// Stop stops a running zookeeper server
 func (srv *ZkServer) Stop() {
 	go func() {
 		time.Sleep(1 * time.Second)

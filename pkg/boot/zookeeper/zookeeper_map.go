@@ -16,10 +16,13 @@ var (
 	log = logger.New()
 )
 
+// CheckZkMappingInFleet verifies if there is a mapping for each node in
+// the CoreOS cluster using the metadata zookeeper=true to filter wich
+// nodes zookeeper should run
 func CheckZkMappingInFleet(etcdPath string, etcdClient *etcd.Client, etcdURL []string) {
-	// check if the nodes with the required role already have the an id. If not
-	// get fleet nodes with the required role and preassing the ids for every
-	// node in the cluster
+	// check if the nodes with the required role already have the an id.
+	// If not get fleet nodes with the required role and preassing the
+	// ids for every node in the cluster
 	err := etcd.AcquireLock(etcdClient, etcdLock, 10)
 	if err != nil {
 		panic(err)
@@ -58,7 +61,7 @@ func CheckZkMappingInFleet(etcdPath string, etcdClient *etcd.Client, etcdURL []s
 	}
 
 	// release the etcd lock
-	etcd.ReleaseLock(etcdClient, etcdLock)
+	etcd.ReleaseLock(etcdClient)
 }
 
 // getMachines return the list of machines that can run zookeeper or an empty list

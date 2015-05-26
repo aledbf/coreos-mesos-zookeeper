@@ -32,7 +32,7 @@ func TestAcquireReleaseLock(t *testing.T) {
 		t.Fatalf("Expected '%v' arguments but returned '%v'", "locked", value)
 	}
 
-	ReleaseLock(etcdClient, "/lock")
+	ReleaseLock(etcdClient)
 
 	value = Get(etcdClient, "/lock")
 	if value != "released" {
