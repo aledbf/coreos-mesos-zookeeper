@@ -1,48 +1,28 @@
 package fleet
 
 import (
-	"net"
 	"net/http"
-	"net/url"
+	"time"
 
-	"github.com/coreos/fleet/client"
+	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
+	"github.com/coreos/fleet/etcd"
+	"github.com/coreos/fleet/registry"
 )
 
-// GetMachines returns the ip address of the nodes with all the specified roles
-func GetMachines(endpoint string, metadata map[string][]string) ([]string, error) {
-	fleetURL, err := url.Parse(endpoint)
+var log = logger.New()
+
+// GetMachinesWithMetadata returns the ip address of the nodes with all the specified roles
+func GetMachinesWithMetadata(url []string, metadata map[string][]string) ([]string, error) {
+	etcdClient, err := etcd.NewClient(url, &http.Transport{}, time.Second)
 	if err != nil {
+		log.Debugf("error creating new fleet etcd client: %v", err)
 		return nil, err
 	}
 
-	dialFunc := net.Dial
-
-	// change configuration for socket communication using http
-	if fleetURL.Scheme == "unix" {
-		sockPath := fleetURL.Path
-		fleetURL.Path = ""
-		fleetURL.Scheme = "http"
-		fleetURL.Host = "domain-sock"
-
-		dialFunc = func(network, addr string) (net.Conn, error) {
-			return net.Dial("unix", sockPath)
-		}
-	}
-
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			Dial:              dialFunc,
-			DisableKeepAlives: true,
-		},
-	}
-
-	fleetClient, err := client.NewHTTPClient(httpClient, *fleetURL)
-	if err != nil {
-		return nil, err
-	}
-
+	fleetClient := registry.NewEtcdRegistry(etcdClient, "/_coreos.com/fleet/")
 	machines, err := fleetClient.Machines()
 	if err != nil {
+		log.Debugf("error creating new fleet etcd client: %v", err)
 		return nil, err
 	}
 
