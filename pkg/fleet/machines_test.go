@@ -33,7 +33,7 @@ func stopEtcd() {
 	etcdServer.Process.Kill()
 }
 
-func TestGetMachinesWithMetadata(t *testing.T) {
+func TestGetNodesWithMetadata(t *testing.T) {
 	startEtcd()
 	defer stopEtcd()
 
@@ -42,7 +42,7 @@ func TestGetMachinesWithMetadata(t *testing.T) {
 		t.Fatalf("Unexpected error '%v'", err)
 	}
 
-	machines, err := GetMachinesWithMetadata([]string{"http://172.17.8.100:4001"}, data)
+	machines, err := GetNodesWithMetadata([]string{"http://172.17.8.100:4001"}, data)
 	if err != nil {
 		t.Fatalf("Expected '%v' arguments but returned '%v'", "", err)
 	}

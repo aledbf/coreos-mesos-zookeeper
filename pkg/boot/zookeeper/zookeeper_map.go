@@ -38,7 +38,11 @@ func CheckZkMappingInFleet(etcdPath string, etcdClient *etcd.Client, etcdURL []s
 	log.Debugf("machines %v", machines)
 
 	if len(machines) == 0 {
-		log.Fatal("there is no machine with valid metadata in the cluster to run zookeeper")
+		log.Warning("")
+		log.Warning("there is no machine using metadata in the cluster to run zookeeper")
+		log.Warning("we will create the mapping with for all the nodes")
+		log.Warning("")
+		machines = fleet.GetNodesInCluster(etcdURL)
 	}
 
 	if len(zkNodes) == 0 {
@@ -71,7 +75,7 @@ func getMachines(etcdURL []string) ([]string, error) {
 		panic(err)
 	}
 
-	return fleet.GetMachinesWithMetadata(etcdURL, metadata)
+	return fleet.GetNodesWithMetadata(etcdURL, metadata)
 }
 
 // getNextNodeID returns the next id to use as zookeeper node index

@@ -11,8 +11,8 @@ import (
 
 var log = logger.New()
 
-// GetMachinesWithMetadata returns the ip address of the nodes with all the specified roles
-func GetMachinesWithMetadata(url []string, metadata map[string][]string) ([]string, error) {
+// GetNodesWithMetadata returns the ip address of the nodes with all the specified roles
+func GetNodesWithMetadata(url []string, metadata map[string][]string) ([]string, error) {
 	etcdClient, err := etcd.NewClient(url, &http.Transport{}, time.Second)
 	if err != nil {
 		log.Debugf("error creating new fleet etcd client: %v", err)
@@ -34,4 +34,26 @@ func GetMachinesWithMetadata(url []string, metadata map[string][]string) ([]stri
 	}
 
 	return machineList, nil
+}
+
+func GetNodesInCluster(url []string) []string {
+	etcdClient, err := etcd.NewClient(url, &http.Transport{}, time.Second)
+	if err != nil {
+		log.Debugf("error creating new fleet etcd client: %v", err)
+		return []string{}
+	}
+
+	fleetClient := registry.NewEtcdRegistry(etcdClient, "/_coreos.com/fleet/")
+	machines, err := fleetClient.Machines()
+	if err != nil {
+		log.Debugf("error creating new fleet etcd client: %v", err)
+		return []string{}
+	}
+
+	var machineList []string
+	for _, m := range machines {
+		machineList = append(machineList, m.PublicIP)
+	}
+
+	return machineList
 }
