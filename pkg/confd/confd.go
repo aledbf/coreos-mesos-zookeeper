@@ -1,26 +1,29 @@
 package confd
 
 import (
-	//"bufio"
+	"bufio"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
-	// "regexp"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
-
-	"github.com/pmylund/go-cache"
 
 	logger "github.com/aledbf/coreos-mesos-zookeeper/pkg/log"
 	oswrapper "github.com/aledbf/coreos-mesos-zookeeper/pkg/os"
 )
 
+const (
+	confdInterval       = 5                // seconds
+	errorTickInterval   = 60 * time.Second // 1 minute
+	maxErrorsInInterval = 5                // up to 5 errors per time interval
+)
+
 var (
 	log                = logger.New()
 	templateErrorRegex = "(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):\\d{2}Z.*ERROR template:"
-	confdCacheError    = cache.New(60*time.Minute, 60*time.Second)
 )
 
 // WaitForInitialConf wait until the compilation of the templates is correct
@@ -41,47 +44,23 @@ func WaitForInitialConf(etcd []string, timeout time.Duration) {
 
 // Launch launch confd as a daemon process.
 func Launch(signalChan chan os.Signal, etcd []string) {
-	cmdAsString := fmt.Sprintf("confd -node %v -confdir /app --interval 5 --log-level error", strings.Join(etcd, ","))
+	cmdAsString := fmt.Sprintf("confd -node %v -confdir /app --interval %v --log-level error", confdInterval, strings.Join(etcd, ","))
 	cmd, args := oswrapper.BuildCommandFromString(cmdAsString)
 	go runConfdDaemon(signalChan, cmd, args)
 }
 
 func runConfdDaemon(signalChan chan os.Signal, command string, args []string) {
-	// testRegex := regexp.MustCompile(templateErrorRegex)
-
 	cmd := exec.Command(command, args...)
 
 	stdout, err := cmd.StdoutPipe()
 	checkError(signalChan, err)
-	stderr, err := cmd.StderrPipe()
-	checkError(signalChan, err)
+	// stderr, err := cmd.StderrPipe()
+	// checkError(signalChan, err)
 
 	go io.Copy(os.Stdout, stdout)
-	go io.Copy(os.Stderr, stderr)
+	// go io.Copy(os.Stderr, stderr)
 
-	// we check if there's more than 5 errors per minute
-	// in that case we need to exist and restart the component
-	// this is to avoid the endless wait for some keys in etcd
-	// go func() {
-	// 	scanner := bufio.NewScanner(stderr)
-	// 	for scanner.Scan() {
-	// 		match := testRegex.FindStringSubmatch(scanner.Text())
-	// 		if match != nil {
-	// 			ts := match[1] + match[2] + match[3] + match[4] + match[5]
-	// 			if _, found := confdCacheError.Get(ts); found {
-	// 				confdCacheError.IncrementInt(ts, 1)
-	// 			} else {
-	// 				confdCacheError.Set(ts, 1, cache.DefaultExpiration)
-	// 			}
-	// 			errorCount, _ := confdCacheError.Get(ts)
-	// 			log.Errorf("confd template error (%v in the last minute)", errorCount)
-	// 			if errorCount.(int) > 4 {
-	// 				log.Error("too many confd errors in the last minute. restarting component")
-	// 				signalChan <- syscall.SIGKILL
-	// 			}
-	// 		}
-	// 	}
-	// }()
+	go checkNumberOfErrors(stdout, maxErrorsInInterval, errorTickInterval, signalChan)
 
 	err = cmd.Start()
 	if err != nil {
@@ -98,5 +77,39 @@ func checkError(signalChan chan os.Signal, err error) {
 	if err != nil {
 		log.Errorf("%v", err)
 		signalChan <- syscall.SIGKILL
+	}
+}
+
+func checkNumberOfErrors(std io.ReadCloser, count uint64, tick time.Duration, signalChan chan os.Signal) {
+	testRegex := regexp.MustCompile(templateErrorRegex)
+	var tickErrors uint64
+	lines := make(chan string)
+	go func() {
+		scanner := bufio.NewScanner(std)
+		scanner.Split(bufio.ScanLines)
+		for scanner.Scan() {
+			lines <- scanner.Text()
+		}
+	}()
+
+	timer := time.NewTicker(tick)
+
+	for {
+		select {
+		case <-timer.C:
+			if tickErrors > count {
+				log.Debugf("number of errors %v", tickErrors)
+				log.Error("too many confd errors in the last minute. restarting component")
+				signalChan <- syscall.SIGKILL
+				return
+			}
+
+			tickErrors = 0
+		case line := <-lines:
+			match := testRegex.FindStringSubmatch(line)
+			if match != nil {
+				tickErrors += 1
+			}
+		}
 	}
 }
