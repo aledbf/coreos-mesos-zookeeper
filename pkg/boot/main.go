@@ -1,4 +1,5 @@
 //go:generate go-extpoints
+
 package boot
 
 import (

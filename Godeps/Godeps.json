@@ -7,8 +7,8 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
-			"Comment": "v0.5.1-35-g2e36101",
-			"Rev": "2e36101a197f56f60ca6c37c3c256ed3713a9649"
+			"Comment": "v0.8.2-2-g6ba91e2",
+			"Rev": "6ba91e24c498b49d0363c723e9e2ab2b5b8fd012"
 		},
 		{
 			"ImportPath": "github.com/coreos/fleet/etcd",
@@ -47,22 +47,22 @@
 		},
 		{
 			"ImportPath": "github.com/coreos/go-etcd/etcd",
-			"Comment": "v0.2.0-rc1-120-g23142f6",
-			"Rev": "23142f6773a676cc2cae8dd0cb90b2ea761c853f"
+			"Comment": "v2.0.0-7-g73a8ef7",
+			"Rev": "73a8ef737e8ea002281a28b4cb92a1de121ad4c6"
 		},
 		{
 			"ImportPath": "github.com/coreos/go-semver/semver",
-			"Rev": "6fe83ccda8fb9b7549c9ab4ba47f47858bc950aa"
+			"Rev": "568e959cd89871e61434c1143528d9162da89ef2"
 		},
 		{
 			"ImportPath": "github.com/coreos/go-systemd/unit",
-			"Comment": "v2-27-g97e243d",
-			"Rev": "97e243d21a8e232e9d8af38ba2366dfcfceebeba"
+			"Comment": "v2-55-gd7b0894",
+			"Rev": "d7b08942d0d85bfcb4694864881c4af7324784d2"
 		},
 		{
 			"ImportPath": "github.com/docker/libcontainer/netlink",
-			"Comment": "v1.2.0-160-g7294213",
-			"Rev": "72942137ef110d9468be3a4855b687d3734794df"
+			"Comment": "v2.1.0-2-g97f4592",
+			"Rev": "97f4592aa8b3fcb9e14c8b5f40a69821f47b9e8b"
 		},
 		{
 			"ImportPath": "github.com/golang/glog",
@@ -70,11 +70,11 @@
 		},
 		{
 			"ImportPath": "github.com/jonboulle/clockwork",
-			"Rev": "b473f398c464f1988327f67c9e6aa7fba62f80d2"
+			"Rev": "3f831b65b61282ba6bece21b91beea2edc4c887a"
 		},
 		{
 			"ImportPath": "github.com/kardianos/osext",
-			"Rev": "ccfcd0245381f0c94c68f50626665eed3c6b726a"
+			"Rev": "10a0e3c4f6267b0f903197acf80d194bab3eb8cb"
 		},
 		{
 			"ImportPath": "github.com/leeor/etcd-sync",

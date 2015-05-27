@@ -108,7 +108,7 @@ func checkNumberOfErrors(std io.ReadCloser, count uint64, tick time.Duration, si
 		case line := <-lines:
 			match := testRegex.FindStringSubmatch(line)
 			if match != nil {
-				tickErrors += 1
+				tickErrors++
 			}
 		}
 	}

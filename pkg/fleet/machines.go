@@ -36,6 +36,8 @@ func GetNodesWithMetadata(url []string, metadata map[string][]string) ([]string,
 	return machineList, nil
 }
 
+// GetNodesInCluster return the list of ip address of all the nodes
+// running in the cluster currently active (fleetctl list-machines)
 func GetNodesInCluster(url []string) []string {
 	etcdClient, err := etcd.NewClient(url, &http.Transport{}, time.Second)
 	if err != nil {
