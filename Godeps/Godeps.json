@@ -11,11 +11,6 @@
 			"Rev": "2e36101a197f56f60ca6c37c3c256ed3713a9649"
 		},
 		{
-			"ImportPath": "github.com/coreos/fleet/client",
-			"Comment": "v0.10.1-13-gf1d86c7",
-			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
-		},
-		{
 			"ImportPath": "github.com/coreos/fleet/etcd",
 			"Comment": "v0.10.1-13-gf1d86c7",
 			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
@@ -46,11 +41,6 @@
 			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
 		},
 		{
-			"ImportPath": "github.com/coreos/fleet/schema",
-			"Comment": "v0.10.1-13-gf1d86c7",
-			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
-		},
-		{
 			"ImportPath": "github.com/coreos/fleet/unit",
 			"Comment": "v0.10.1-13-gf1d86c7",
 			"Rev": "f1d86c7bd0ec00162682024336d898d5838cc9a4"
@@ -75,6 +65,10 @@
 			"Rev": "72942137ef110d9468be3a4855b687d3734794df"
 		},
 		{
+			"ImportPath": "github.com/golang/glog",
+			"Rev": "44145f04b68cf362d9c4df2182967c2275eaefed"
+		},
+		{
 			"ImportPath": "github.com/jonboulle/clockwork",
 			"Rev": "b473f398c464f1988327f67c9e6aa7fba62f80d2"
 		},
@@ -83,8 +77,8 @@
 			"Rev": "ccfcd0245381f0c94c68f50626665eed3c6b726a"
 		},
 		{
-			"ImportPath": "github.com/pmylund/go-cache",
-			"Rev": "93d85800f2fa6bd0a739e7bd612bfa3bc008b72d"
+			"ImportPath": "github.com/leeor/etcd-sync",
+			"Rev": "1b8ac808160f955a5a2cdf21809e968698b07e8d"
 		},
 		{
 			"ImportPath": "github.com/progrium/go-basher",
@@ -94,10 +88,6 @@
 			"ImportPath": "github.com/robfig/cron",
 			"Comment": "v1-2-g67823cd",
 			"Rev": "67823cd24dece1b04cced3a0a0b3ca2bc84d875e"
-		},
-		{
-			"ImportPath": "google.golang.org/api/googleapi",
-			"Rev": "d4ab0b854f8606d689612515c3d18bd3b19d7e70"
 		}
 	]
 }
