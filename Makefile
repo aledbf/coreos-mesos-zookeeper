@@ -10,7 +10,7 @@ repo_path = github.com/aledbf/coreos-mesos-zookeeper
 GO = godep go
 GOFMT = gofmt -l
 GOLINT = golint
-GOTEST = $(GO) test --cover --race -v
+GOTEST = $(GO) test -cover -race -v
 GOVET = $(GO) vet
 
 GO_PACKAGES = pkg/boot pkg/confd pkg/etcd pkg/fleet pkg/log pkg/net
@@ -64,7 +64,7 @@ build-tools:
 	echo "Building tools..."
 
 test: mesos-go zookeeper-go
-	go test -cover -timeout 10s ./...
+	@$(GOFMT) -timeout 10s $(GO_PACKAGES)
 
 test-style:
 	@$(GOFMT) $(GO_PACKAGES)

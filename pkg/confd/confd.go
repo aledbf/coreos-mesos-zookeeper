@@ -44,7 +44,11 @@ func WaitForInitialConf(etcd []string, timeout time.Duration) {
 
 // Launch launch confd as a daemon process.
 func Launch(signalChan chan os.Signal, etcd []string) {
-	cmdAsString := fmt.Sprintf("confd -node %v -confdir /app --interval %v --log-level error", confdInterval, strings.Join(etcd, ","))
+	confdLogLevel := "error"
+	if log.Level.String() == "debug" {
+		confdLogLevel = "debug"
+	}
+	cmdAsString := fmt.Sprintf("confd -node %v -confdir /app --interval %v --log-level %v", confdInterval, strings.Join(etcd, ","), confdLogLevel)
 	cmd, args := oswrapper.BuildCommandFromString(cmdAsString)
 	go runConfdDaemon(signalChan, cmd, args)
 }
@@ -64,12 +68,12 @@ func runConfdDaemon(signalChan chan os.Signal, command string, args []string) {
 
 	err = cmd.Start()
 	if err != nil {
-		log.Errorf("an error ocurred executing command: [%s params %v], %v", command, args, err)
+		log.Errorf("an error ocurred executing confd: [%s params %v], %v", command, args, err)
 		signalChan <- syscall.SIGKILL
 	}
 
 	err = cmd.Wait()
-	log.Errorf("command finished with error: %v", err)
+	log.Errorf("confd command finished with error: %v", err)
 	signalChan <- syscall.SIGKILL
 }
 

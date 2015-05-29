@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -50,6 +51,7 @@ func RunProcessAsDaemon(signalChan chan os.Signal, command string, args []string
 // RunScript run a shell script using go-basher and if it returns an error
 // send a signal to terminate the execution
 func RunScript(script string, params map[string]string, loader func(string) ([]byte, error)) error {
+	log.Debugf("running script %v", script)
 	bash, _ := basher.NewContext("/bin/bash", log.Level.String() == "debug")
 	bash.Source(script, loader)
 	if params != nil {
@@ -112,4 +114,18 @@ func Random(size int) (string, error) {
 // Hostname returns the host name reported by the kernel.
 func Hostname() (name string, err error) {
 	return os.Hostname()
+}
+
+func CopyFile(src string, dst string) error {
+	data, err := ioutil.ReadFile(src)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(dst, data, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

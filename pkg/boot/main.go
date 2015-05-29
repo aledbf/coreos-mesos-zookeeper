@@ -93,14 +93,18 @@ func Start(etcdPath string, externalPort int) {
 
 	host := oswrapper.Getopt("HOST", "127.0.0.1")
 	etcdPort, _ := strconv.Atoi(oswrapper.Getopt("ETCD_PORT", "4001"))
-	etcdCtlPeers := oswrapper.Getopt("ETCD_PEERS", "127.0.0.1:"+strconv.Itoa(etcdPort))
-	etcdClient := etcd.NewClient(etcd.GetHTTPEtcdUrls(host+":"+strconv.Itoa(etcdPort), etcdCtlPeers))
+	etcdPeers := oswrapper.Getopt("ETCD_PEERS", "127.0.0.1:"+strconv.Itoa(etcdPort))
+	etcdClient := etcd.NewClient(etcd.GetHTTPEtcdUrls(host+":"+strconv.Itoa(etcdPort), etcdPeers))
+
+	etcdURL := etcd.GetHTTPEtcdUrls(host+":"+strconv.Itoa(etcdPort), etcdPeers)
 
 	currentBoot := &types.CurrentBoot{
-		ConfdNodes: getConfdNodes(host, etcdCtlPeers, etcdPort),
+		ConfdNodes: getConfdNodes(host+":"+strconv.Itoa(etcdPort), etcdPeers),
 		EtcdClient: etcdClient,
 		EtcdPath:   etcdPath,
 		EtcdPort:   etcdPort,
+		EtcdPeers:  etcdPeers,
+		EtcdURL:    etcdURL,
 		Host:       net.ParseIP(host),
 		Timeout:    timeout,
 		TTL:        timeout * 2,
@@ -125,30 +129,35 @@ func Start(etcdPath string, externalPort int) {
 func start(currentBoot *types.CurrentBoot) {
 	log.Info("starting component...")
 
+	log.Debug("creating required etcd directories")
 	for _, key := range component.MkdirsEtcd() {
 		etcd.Mkdir(currentBoot.EtcdClient, key)
 	}
 
+	log.Debug("setting default etcd values")
 	for key, value := range component.EtcdDefaults() {
 		etcd.SetDefault(currentBoot.EtcdClient, key, value)
 	}
 
-	component.PreBoot(currentBoot)
+	// component.PreBoot(currentBoot)
 
-	if component.UseConfd() {
-		// wait until etcd has discarded potentially stale values
-		time.Sleep(timeout + 1)
-
+	initial, daemon := component.UseConfd()
+	if initial {
 		// wait for confd to run once and install initial templates
+		log.Debug("waiting for initial confd configuration")
 		confd.WaitForInitialConf(currentBoot.ConfdNodes, currentBoot.Timeout)
 	}
+
+	log.Debug("running preboot code")
+	component.PreBoot(currentBoot)
 
 	log.Debug("running pre boot scripts")
 	preBootScripts := component.PreBootScripts(currentBoot)
 	runAllScripts(signalChan, preBootScripts)
 
-	if component.UseConfd() {
+	if daemon {
 		// spawn confd in the background to update services based on etcd changes
+		log.Debug("launching confd")
 		go confd.Launch(signalChan, currentBoot.ConfdNodes)
 	}
 
@@ -163,23 +172,25 @@ func start(currentBoot *types.CurrentBoot) {
 	ipToListen := "0.0.0.0"
 	netIfaces := net.GetNetworkInterfaces()
 	for _, iface := range netIfaces {
-		if iface.IP == currentBoot.Host.String() {
+		if strings.Index(iface.IP, currentBoot.Host.String()) > -1 {
 			ipToListen = currentBoot.Host.String()
 			break
 		}
 	}
 
 	portsToWaitFor := component.WaitForPorts()
-	log.Debugf("waiting for a service in the port %v", portsToWaitFor)
+	log.Debugf("waiting for a service in the port %v in ip %v", portsToWaitFor, ipToListen)
 	for _, portToWait := range portsToWaitFor {
 		if portToWait > 0 {
 			err := net.WaitForPort("tcp", ipToListen, portToWait, timeout)
 			if err != nil {
-				log.Printf("%v", err)
+				log.Errorf("error waiting for port %v using ip %v: %v", portToWait, ipToListen, err)
 				signalChan <- syscall.SIGINT
 			}
 		}
 	}
+
+	time.Sleep(60 * time.Second)
 
 	// we only publish the service in etcd if the port if > 0
 	if currentBoot.Port > 0 {
@@ -191,7 +202,7 @@ func start(currentBoot *types.CurrentBoot) {
 		time.Sleep(timeout / 2)
 	}
 
-	log.Printf("running post boot scripts")
+	log.Debug("running post boot scripts")
 	postBootScripts := component.PostBootScripts(currentBoot)
 	runAllScripts(signalChan, postBootScripts)
 
@@ -206,17 +217,17 @@ func start(currentBoot *types.CurrentBoot) {
 	component.PostBoot(currentBoot)
 }
 
-func getConfdNodes(host, etcdCtlPeers string, port int) []string {
-	if etcdCtlPeers != "127.0.0.1" {
+func getConfdNodes(host, etcdCtlPeers string) []string {
+	if etcdCtlPeers != "127.0.0.1:4001" {
 		hosts := strings.Split(etcdCtlPeers, ",")
 		result := []string{}
 		for _, _host := range hosts {
-			result = append(result, _host+":"+strconv.Itoa(port))
+			result = append(result, _host)
 		}
 		return result
 	}
 
-	return []string{host + ":" + strconv.Itoa(port)}
+	return []string{host}
 }
 
 func runAllScripts(signalChan chan os.Signal, scripts []*types.Script) {
@@ -231,7 +242,7 @@ func runAllScripts(signalChan chan os.Signal, scripts []*types.Script) {
 		}
 		err := oswrapper.RunScript(script.Name, script.Params, script.Content)
 		if err != nil {
-			log.Printf("command finished with error: %v", err)
+			log.Errorf("script %v execution finished with error: %v", script.Name, err)
 			signalChan <- syscall.SIGTERM
 		}
 	}

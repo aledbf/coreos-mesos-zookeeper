@@ -68,8 +68,8 @@ func (mb *MesosBoot) ScheduleTasks(currentBoot *types.CurrentBoot) []*types.Cron
 	return []*types.Cron{}
 }
 
-func (mb *MesosBoot) UseConfd() bool {
-	return false
+func (mb *MesosBoot) UseConfd() (bool, bool) {
+	return false, false
 }
 
 func (mb *MesosBoot) PreShutdownScripts(currentBoot *types.CurrentBoot) []*types.Script {

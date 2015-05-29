@@ -14,6 +14,8 @@ type CurrentBoot struct {
 	EtcdClient *etcd.Client
 	EtcdPath   string
 	EtcdPort   int
+	EtcdPeers  string
+	EtcdURL    []string
 	Host       net.IP
 	Port       int
 	Timeout    time.Duration

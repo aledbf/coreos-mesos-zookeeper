@@ -20,7 +20,7 @@ type BootComponent interface {
 	PreBootScripts(currentBoot *types.CurrentBoot) []*types.Script
 
 	// UseConfd is required the use of confd?
-	UseConfd() bool
+	UseConfd() (bool, bool)
 
 	// BootDaemons required commands to start the component
 	BootDaemons(currentBoot *types.CurrentBoot) []*types.ServiceDaemon

@@ -10,7 +10,12 @@ if [[ -z $DOCKER_BUILD ]]; then
   exit 1
 fi
 
-apk add --update curl ca-certificates bash
+apk add --update \
+  curl \
+  ca-certificates \
+  bash \
+  readline \
+  ncurses-libs
 
 cd /tmp
 
