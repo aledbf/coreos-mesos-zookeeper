@@ -19,6 +19,7 @@ ExecStop=/usr/bin/docker stop zookeeper
 WantedBy=multi-user.target
 
 [X-Fleet]
-MachineMetadata=zookeeper=true
+# require specific metadata to schedule the service
+# MachineMetadata=zookeeper=true
 Conflicts=zookeeper@*.service
 
