@@ -39,7 +39,7 @@ func CheckZkMappingInFleet(etcdPath string, etcdClient *etcd.Client, etcdURL []s
 
 	if len(machines) == 0 {
 		log.Warning("")
-		log.Warning("there is no machine using metadata in the cluster to run zookeeper")
+		log.Warning("there is no machine using metadata zookeeper=true in the cluster to run zookeeper")
 		log.Warning("we will create the mapping with for all the nodes")
 		log.Warning("")
 		machines = fleet.GetNodesInCluster(etcdURL)
